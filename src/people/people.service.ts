@@ -30,8 +30,4 @@ export class PeopleService {
   remove(id: number) {
     return `This action removes a #${id} person`;
   }
-
-  uploadImages(files: Array<Express.Multer.File>): void {
-    console.log(files);
-  }
 }

@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ImageEntity } from '../../image/entities/image.entity';
 
 @Entity()
 export class PeopleEntity {
@@ -6,7 +7,7 @@ export class PeopleEntity {
   id: number;
 
   @Column()
-  name: string;
+  newName: string;
 
   @Column()
   height: string;
@@ -64,4 +65,11 @@ export class PeopleEntity {
 
   @Column()
   url: string;
+
+  @OneToMany(() => ImageEntity, (image) => image.people)
+  images: ImageEntity[];
+
+  getImages(): ImageEntity[] {
+    return this.images;
+  }
 }
