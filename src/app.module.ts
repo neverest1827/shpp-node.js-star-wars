@@ -3,10 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PeopleModule } from './people/people.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ImageModule } from './image/image.module';
 
 @Module({
   imports: [
-    PeopleModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',
@@ -14,10 +14,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       username: 'admin',
       password: 'Zaq1W2e34',
       database: 'star_wars',
-      autoLoadEntities: true,
+      entities: ['dist/**/*.entity.js'],
       migrations: ['dist/migrations/**/*.js'],
-      synchronize: true,
+      synchronize: false,
     }),
+    PeopleModule,
+    ImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
