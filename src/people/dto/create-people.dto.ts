@@ -1,10 +1,10 @@
 import {
   IsNotEmpty,
   IsString,
-  IsIn,
   IsArray,
   ArrayUnique,
   ArrayMinSize,
+  IsDate,
 } from 'class-validator';
 
 export class CreatePeopleDto {
@@ -31,7 +31,6 @@ export class CreatePeopleDto {
   birth_year: string;
   @IsNotEmpty()
   @IsString()
-  @IsIn(['male', 'female', 'n/a'])
   gender: string;
   @IsNotEmpty()
   @IsString()
@@ -61,21 +60,12 @@ export class CreatePeopleDto {
   @ArrayUnique()
   starships: string[];
   @IsNotEmpty()
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsString({ each: true })
-  @ArrayUnique()
-  created: string;
+  @IsDate()
+  created: Date;
   @IsNotEmpty()
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsString({ each: true })
-  @ArrayUnique()
-  edited: string;
+  @IsDate()
+  edited: Date;
   @IsNotEmpty()
-  @IsArray()
-  @ArrayMinSize(1)
   @IsString({ each: true })
-  @ArrayUnique()
   url: string;
 }

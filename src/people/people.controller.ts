@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { PeopleService } from './people.service';
 import { CreatePeopleDto } from './dto/create-people.dto';
@@ -28,17 +29,20 @@ export class PeopleController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.peopleService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.peopleService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePersonDto: UpdatePeopleDto) {
-    return this.peopleService.update(+id, updatePersonDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePersonDto: UpdatePeopleDto,
+  ) {
+    return this.peopleService.update(id, updatePersonDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.peopleService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.peopleService.remove(id);
   }
 }

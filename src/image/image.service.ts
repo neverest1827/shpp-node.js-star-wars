@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PeopleEntity } from '../people/entities/people.entity';
-import { ImageEntity } from './entities/image.entity';
+import { People } from '../people/entities/people.entity';
+import { Image } from './entities/image.entity';
 import { Repository } from 'typeorm';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { UpdateImageDto } from './dto/update-image.dto';
 
 @Injectable()
 export class ImageService {
@@ -13,12 +14,12 @@ export class ImageService {
     people: this.peopleRepository,
   };
   constructor(
-    @InjectRepository(ImageEntity)
-    private imageRepository: Repository<ImageEntity>,
-    @InjectRepository(PeopleEntity)
-    private peopleRepository: Repository<PeopleEntity>,
+    @InjectRepository(Image)
+    private imageRepository: Repository<Image>,
+    @InjectRepository(People)
+    private peopleRepository: Repository<People>,
   ) {}
-  async upload(
+  async create(
     entityType: string,
     entityId: number,
     files: Array<Express.Multer.File>,
@@ -62,7 +63,24 @@ export class ImageService {
     return 'All photo upload';
   }
 
-  remove(entityType: string, entityId: number): string {
+  findAll() {
+    return `This action returns all image`;
+  }
+
+  findOne(id: number) {
+    return `This action returns a #${id} image`;
+  }
+
+  update(
+    entityType: string,
+    entityId: number,
+    imageNumber: number,
+    updateImageDto: UpdateImageDto,
+  ) {
+    return `This action updates a # image`;
+  }
+
+  remove(entityType: string, entityId: number, imageNumber: number): string {
     return `This action removes a #${entityType}/${entityId} image`;
   }
 }

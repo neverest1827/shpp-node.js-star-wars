@@ -1,1 +1,6 @@
-export class CreateImageDto {}
+import { ApiProperty } from '@nestjs/swagger';
+
+export class CreateImageDto {
+  @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
+  files: any[];
+}

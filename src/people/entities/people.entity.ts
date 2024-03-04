@@ -1,75 +1,88 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ImageEntity } from '../../image/entities/image.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Image } from '../../image/entities/image.entity';
+import { Color } from '../../color/entities/color.entity';
+import { Gender } from '../../gender/entities/gender.entity';
+import { Planet } from '../../planet/entities/planet.entity';
+import { Film } from '../../film/entities/film.entity';
+import { Specie } from '../../specie/entities/specie.entity';
+import { Vehicle } from '../../vehicle/entities/vehicle.entity';
+import { Starship } from '../../starship/entities/starship.entity';
 
 @Entity()
-export class PeopleEntity {
+export class People {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: number; //+
 
   @Column()
-  newName: string;
+  name: string; //+
 
   @Column()
-  height: string;
+  height: string; //+
 
   @Column()
-  mass: string;
+  mass: string; //+
+
+  @ManyToOne(() => Color)
+  @JoinColumn({ name: 'hair_color_id' })
+  hair_color: Color; //+
+
+  @ManyToOne(() => Color)
+  @JoinColumn({ name: 'skin_color_id' })
+  skin_color: Color; //+
+
+  @ManyToOne(() => Color)
+  @JoinColumn({ name: 'eye_color_id' })
+  eye_color: Color; //+
 
   @Column()
-  hair_color: string;
+  birth_year: string; //+
+
+  @ManyToOne(() => Gender)
+  @JoinColumn({ name: 'gender_id' })
+  gender: Gender; //+
+
+  @ManyToOne(() => Planet, (planet) => planet.residents)
+  @JoinColumn({ name: 'homeworld_id' })
+  homeworld: Planet;
+
+  @ManyToMany(() => Film, (film) => film.characters)
+  @JoinTable({ name: 'people_film' })
+  films: Film[];
+
+  @ManyToMany(() => Specie, (specie) => specie.people)
+  @JoinTable({ name: 'people_specie' })
+  species: Specie[];
+
+  @ManyToMany(() => Vehicle, (vehicle) => vehicle.pilots)
+  @JoinTable({ name: 'people_vehicle' })
+  vehicles: Vehicle[];
+
+  @ManyToMany(() => Starship, (starship) => starship.pilots)
+  @JoinTable({ name: 'people_starship' })
+  starships: Starship[];
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  created: Date; //+
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  edited: Date; //+
 
   @Column()
-  skin_color: string;
+  url: string; //+
 
-  @Column()
-  eye_color: string;
+  @OneToMany(() => Image, (image) => image.people)
+  images: Image[];
 
-  @Column()
-  birth_year: string;
-
-  @Column()
-  gender: string;
-
-  @Column()
-  homeworld: string;
-
-  // @ManyToMany(() => Film)
-  // @JoinTable()
-  // films: Film[];
-  @Column()
-  films: string;
-
-  // @ManyToMany(() => Species)
-  // @JoinTable()
-  // species: Species[];
-  @Column()
-  species: string;
-
-  // @ManyToMany(() => Vehicle)
-  // @JoinTable()
-  // vehicles: Vehicle[];
-  @Column()
-  vehicles: string;
-
-  // @ManyToMany(() => Starship)
-  // @JoinTable()
-  // starships: Starship[];
-  @Column()
-  starships: string;
-
-  @Column()
-  created: string;
-
-  @Column()
-  edited: string;
-
-  @Column()
-  url: string;
-
-  @OneToMany(() => ImageEntity, (image) => image.people)
-  images: ImageEntity[];
-
-  getImages(): ImageEntity[] {
+  getImages(): Image[] {
     return this.images;
   }
 }

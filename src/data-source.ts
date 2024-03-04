@@ -7,7 +7,7 @@ export const AppDataSource = new DataSource({
   username: 'admin',
   password: 'Zaq1W2e34',
   database: 'star_wars',
-  synchronize: true,
+  synchronize: false,
   logging: false,
   entities: ['dist/**/*.entity.js'],
   migrations: ['dist/migrations/**/*.js'],
