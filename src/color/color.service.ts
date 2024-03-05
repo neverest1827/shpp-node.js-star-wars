@@ -12,7 +12,10 @@ export class ColorService {
     private colorRepository: Repository<Color>,
   ) {}
   async create(createColorDto: CreateColorDto): Promise<Color> {
-    return await this.colorRepository.create({ value: createColorDto.value });
+    const new_color: Color = await this.colorRepository.create({
+      value: createColorDto.value,
+    });
+    return await this.colorRepository.save(new_color);
   }
 
   async findAll(): Promise<Color[]> {
@@ -27,12 +30,20 @@ export class ColorService {
     id: number,
     updateColorDto: UpdateColorDto,
   ): Promise<UpdateResult> {
+    const color: Color = await this.findOne(id);
+
+    if (!color) return null;
+
     return await this.colorRepository.update(id, {
       value: updateColorDto.value,
     });
   }
 
   async remove(id: number): Promise<DeleteResult> {
+    const color: Color = await this.findOne(id);
+
+    if (!color) return null;
+
     return await this.colorRepository.delete(id);
   }
 }
