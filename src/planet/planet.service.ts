@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Planet } from './entities/planet.entity';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CommonService } from '../common/common.service';
-import { Film } from '../film/entities/film.entity';
 
 @Injectable()
 export class PlanetService {
@@ -16,7 +15,7 @@ export class PlanetService {
   ) {}
   async create(createPlanetDto: CreatePlanetDto): Promise<Planet> {
     const id: number = (await this.planetRepository.count()) + 1;
-    return await this.planetRepository.create({
+    const new_planet: Planet = await this.planetRepository.create({
       id: id,
       name: createPlanetDto.name,
       rotation_period: createPlanetDto.rotation_period,
@@ -27,10 +26,14 @@ export class PlanetService {
       terrain: createPlanetDto.terrain,
       surface_water: createPlanetDto.surface_water,
       population: createPlanetDto.population,
+      residents: [],
+      films: [],
       created: createPlanetDto.created,
       edited: createPlanetDto.edited,
       url: this.commonService.createUrl(id, 'planets'),
+      images: [],
     });
+    return this.planetRepository.save(new_planet);
   }
 
   async findAll(): Promise<Planet[]> {
@@ -45,20 +48,20 @@ export class PlanetService {
     id: number,
     updatePlanetDto: UpdatePlanetDto,
   ): Promise<UpdateResult> {
-    const planetToUpdate: Planet = await this.planetRepository.findOne({
-      where: { id: id },
-    });
-    if (!planetToUpdate) {
-      return null;
-    }
+    const planetToUpdate: Planet = await this.findOne(id);
 
-    // Применяем изменения из UpdateFilmDto к сущности
+    if (!planetToUpdate) return null;
+
     Object.assign(planetToUpdate, updatePlanetDto);
 
     return await this.planetRepository.update(id, planetToUpdate);
   }
 
   async remove(id: number): Promise<DeleteResult> {
+    const planetToUpdate: Planet = await this.findOne(id);
+
+    if (!planetToUpdate) return null;
+
     return await this.planetRepository.delete(id);
   }
 }
