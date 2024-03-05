@@ -3,9 +3,8 @@ import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Vehicle } from './entities/vehicle.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CommonService } from '../common/common.service';
-import { Planet } from '../planet/entities/planet.entity';
 
 @Injectable()
 export class VehicleService {
@@ -14,9 +13,9 @@ export class VehicleService {
     private vehicleRepository: Repository<Vehicle>,
     private readonly commonService: CommonService,
   ) {}
-  async create(createVehicleDto: CreateVehicleDto) {
+  async create(createVehicleDto: CreateVehicleDto): Promise<Vehicle> {
     const id: number = (await this.vehicleRepository.count()) + 1;
-    return await this.vehicleRepository.create({
+    const new_vehicle: Vehicle = await this.vehicleRepository.create({
       id: id,
       name: createVehicleDto.name,
       model: createVehicleDto.model,
@@ -36,31 +35,35 @@ export class VehicleService {
       url: this.commonService.createUrl(id, 'vecicles'),
       images: [],
     });
+    return await this.vehicleRepository.save(new_vehicle);
   }
 
-  async findAll() {
+  async findAll(): Promise<Vehicle[]> {
     return await this.vehicleRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Vehicle> {
     return await this.vehicleRepository.findOne({ where: { id: id } });
   }
 
-  async update(id: number, updateVehicleDto: UpdateVehicleDto) {
-    const vehicleToUpdate: Vehicle = await this.vehicleRepository.findOne({
-      where: { id: id },
-    });
-    if (!vehicleToUpdate) {
-      return null;
-    }
+  async update(
+    id: number,
+    updateVehicleDto: UpdateVehicleDto,
+  ): Promise<UpdateResult> {
+    const vehicleToUpdate: Vehicle = await this.findOne(id);
 
-    // Применяем изменения из UpdateFilmDto к сущности
+    if (!vehicleToUpdate) return null;
+
     Object.assign(vehicleToUpdate, updateVehicleDto);
 
     return await this.vehicleRepository.update(id, vehicleToUpdate);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteResult> {
+    const vehicleToUpdate: Vehicle = await this.findOne(id);
+
+    if (!vehicleToUpdate) return null;
+
     return await this.vehicleRepository.delete(id);
   }
 }
