@@ -3,10 +3,7 @@ import { CreatePeopleDto } from './dto/create-people.dto';
 import { UpdatePeopleDto } from './dto/update-people.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { People } from './entities/people.entity';
-import { Repository } from 'typeorm';
-import { Color } from '../color/entities/color.entity';
-import { Gender } from '../gender/entities/gender.entity';
-import { Planet } from '../planet/entities/planet.entity';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CommonService } from '../common/common.service';
 
 @Injectable()
@@ -16,9 +13,9 @@ export class PeopleService {
     private peopleRepository: Repository<People>,
     private readonly commonService: CommonService,
   ) {}
-  async create(createPersonDto: CreatePeopleDto) {
+  async create(createPersonDto: CreatePeopleDto): Promise<People> {
     const id: number = (await this.peopleRepository.count()) + 1;
-    return this.peopleRepository.create({
+    const new_people: People = this.peopleRepository.create({
       id: id,
       name: createPersonDto.name,
       height: createPersonDto.height,
@@ -40,31 +37,35 @@ export class PeopleService {
       url: this.commonService.createUrl(id, 'peoples'),
       images: [],
     });
+    return await this.peopleRepository.save(new_people);
   }
 
-  async findAll() {
+  async findAll(): Promise<People[]> {
     return await this.peopleRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<People> {
     return await this.peopleRepository.findOne({ where: { id: id } });
   }
 
-  async update(id: number, updatePersonDto: UpdatePeopleDto) {
-    const personToUpdate: People = await this.peopleRepository.findOne({
-      where: { id: id },
-    });
-    if (!personToUpdate) {
-      return null;
-    }
+  async update(
+    id: number,
+    updatePersonDto: UpdatePeopleDto,
+  ): Promise<UpdateResult> {
+    const personToUpdate: People = await this.findOne(id);
 
-    // Применяем изменения из UpdateFilmDto к сущности
+    if (!personToUpdate) return null;
+
     Object.assign(personToUpdate, updatePersonDto);
 
     return await this.peopleRepository.update(id, personToUpdate);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteResult> {
+    const personToUpdate: People = await this.findOne(id);
+
+    if (!personToUpdate) return null;
+
     return this.peopleRepository.delete(id);
   }
 }
