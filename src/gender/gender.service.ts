@@ -12,7 +12,10 @@ export class GenderService {
     private genderRepository: Repository<Gender>,
   ) {}
   async create(createGenderDto: CreateGenderDto): Promise<Gender> {
-    return await this.genderRepository.save({ value: createGenderDto.value });
+    const new_gender: Gender = await this.genderRepository.create({
+      value: createGenderDto.value,
+    });
+    return await this.genderRepository.save(new_gender);
   }
 
   async findAll(): Promise<Gender[]> {
@@ -27,12 +30,20 @@ export class GenderService {
     id: number,
     updateGenderDto: UpdateGenderDto,
   ): Promise<UpdateResult> {
+    const gender: Gender = await this.findOne(id);
+
+    if (!gender) return null;
+
     return await this.genderRepository.update(id, {
       value: updateGenderDto.value,
     });
   }
 
   async remove(id: number): Promise<DeleteResult> {
+    const gender: Gender = await this.findOne(id);
+
+    if (!gender) return null;
+
     return await this.genderRepository.delete(id);
   }
 }
