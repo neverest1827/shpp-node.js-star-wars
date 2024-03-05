@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { CreateSpecieDto } from './dto/create-specie.dto';
 import { UpdateSpecieDto } from './dto/update-specie.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { Specie } from './entities/specie.entity';
 import { CommonService } from '../common/common.service';
-import { Planet } from '../planet/entities/planet.entity';
 
 @Injectable()
 export class SpecieService {
@@ -16,7 +15,7 @@ export class SpecieService {
   ) {}
   async create(createSpecieDto: CreateSpecieDto): Promise<Specie> {
     const id: number = (await this.specieRepository.count()) + 1;
-    const newSpecie: Specie = await this.specieRepository.create({
+    const new_specie: Specie = await this.specieRepository.create({
       id: id,
       name: createSpecieDto.name,
       classification: createSpecieDto.classification,
@@ -35,32 +34,35 @@ export class SpecieService {
       url: this.commonService.createUrl(id, 'species'),
       images: [],
     });
-    return await this.specieRepository.save(newSpecie);
+    return await this.specieRepository.save(new_specie);
   }
 
-  async findAll() {
+  async findAll(): Promise<Specie[]> {
     return await this.specieRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Specie> {
     return await this.specieRepository.findOne({ where: { id: id } });
   }
 
-  async update(id: number, updateSpecieDto: UpdateSpecieDto) {
-    const specieToUpdate: Specie = await this.specieRepository.findOne({
-      where: { id: id },
-    });
-    if (!specieToUpdate) {
-      return null;
-    }
+  async update(
+    id: number,
+    updateSpecieDto: UpdateSpecieDto,
+  ): Promise<UpdateResult> {
+    const specieToUpdate: Specie = await this.findOne(id);
 
-    // Применяем изменения из UpdateFilmDto к сущности
+    if (!specieToUpdate) return null;
+
     Object.assign(specieToUpdate, updateSpecieDto);
 
     return await this.specieRepository.update(id, specieToUpdate);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteResult> {
+    const specieToUpdate: Specie = await this.findOne(id);
+
+    if (!specieToUpdate) return null;
+
     return await this.specieRepository.delete(id);
   }
 }
