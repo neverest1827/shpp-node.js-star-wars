@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateStarshipDto } from './dto/create-starship.dto';
 import { UpdateStarshipDto } from './dto/update-starship.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Planet } from '../planet/entities/planet.entity';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { CommonService } from '../common/common.service';
 import { Starship } from './entities/starship.entity';
 
@@ -14,9 +13,9 @@ export class StarshipService {
     private starshipRepository: Repository<Starship>,
     private readonly commonService: CommonService,
   ) {}
-  async create(createStarshipDto: CreateStarshipDto) {
+  async create(createStarshipDto: CreateStarshipDto): Promise<Starship> {
     const id: number = (await this.starshipRepository.count()) + 1;
-    return await this.starshipRepository.create({
+    const new_starship: Starship = await this.starshipRepository.create({
       id: id,
       name: createStarshipDto.name,
       model: createStarshipDto.model,
@@ -38,31 +37,32 @@ export class StarshipService {
       url: this.commonService.createUrl(id, 'starships'),
       images: [],
     });
+    return this.starshipRepository.save(new_starship);
   }
 
-  async findAll() {
+  async findAll(): Promise<Starship[]> {
     return await this.starshipRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<Starship> {
     return await this.starshipRepository.findOne({ where: { id: id } });
   }
 
-  async update(id: number, updateStarshipDto: UpdateStarshipDto) {
-    const starshipToUpdate: Starship = await this.starshipRepository.findOne({
-      where: { id: id },
-    });
-    if (!starshipToUpdate) {
-      return null;
-    }
+  async update(id: number, updateStarshipDto: UpdateStarshipDto): Promise<UpdateResult> {
+    const starshipToUpdate: Starship = await this.findOne(id);
 
-    // Применяем изменения из UpdateFilmDto к сущности
+    if (!starshipToUpdate) return null;
+
     Object.assign(starshipToUpdate, updateStarshipDto);
 
     return await this.starshipRepository.update(id, starshipToUpdate);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<DeleteResult> {
+    const starshipToUpdate: Starship = await this.findOne(id);
+
+    if (!starshipToUpdate) return null;
+
     return await this.starshipRepository.delete(id);
   }
 }
