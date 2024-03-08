@@ -48,7 +48,10 @@ export class StarshipService {
     return await this.starshipRepository.findOne({ where: { id: id } });
   }
 
-  async update(id: number, updateStarshipDto: UpdateStarshipDto): Promise<UpdateResult> {
+  async update(
+    id: number,
+    updateStarshipDto: UpdateStarshipDto,
+  ): Promise<UpdateResult> {
     const starshipToUpdate: Starship = await this.findOne(id);
 
     if (!starshipToUpdate) return null;
