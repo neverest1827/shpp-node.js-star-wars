@@ -11,8 +11,11 @@ export class CommonService {
   constructor(
     @InjectRepository(People)
     private peopleRepository: Repository<People>,
+    @InjectRepository(Color)
     private colorRepository: Repository<Color>,
+    @InjectRepository(Gender)
     private genderRepository: Repository<Gender>,
+    @InjectRepository(Planet)
     private planetRepository: Repository<Planet>,
   ) {}
   createUrl(id: number, entity: string): string {
