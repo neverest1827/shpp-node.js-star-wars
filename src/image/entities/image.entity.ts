@@ -18,7 +18,10 @@ export class Image {
   id: number;
 
   @Column()
-  image_path: string;
+  filename: string;
+
+  @Column()
+  imagePath: string;
 
   @ManyToOne(() => People, (people) => people.images)
   @JoinColumn({ name: 'people_id' })

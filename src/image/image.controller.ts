@@ -10,20 +10,21 @@ import {
   FileTypeValidator,
   Get,
   Patch,
-  Body,
-} from '@nestjs/common';
+  Body, Res
+} from "@nestjs/common";
 import { ImageService } from './image.service';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CreateImageDto } from './dto/create-image.dto';
-import { UpdateImageDto } from './dto/update-image.dto';
+import { Image } from './entities/image.entity';
+import { Response } from "express";
 
 @Controller('api/v1/image')
 @ApiTags('Image')
 export class ImageController {
   constructor(private readonly imageService: ImageService) {}
 
-  @Post()
+  @Post(':entityType/:entityId')
   @UseInterceptors(AnyFilesInterceptor())
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -46,36 +47,21 @@ export class ImageController {
   }
 
   @Get()
-  findAll() {
-    return this.imageService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.imageService.findOne(+id);
-  }
-
-  @Patch()
-  update(
+  findAll(
     @Param('entityType') entityType: string,
-    @Param('entityId') entityId: string,
-    @Param('imgNumber') imageNumber: string,
-    @Body() updateImageDto: UpdateImageDto,
-  ) {
-    return this.imageService.update(
-      entityType,
-      +entityId,
-      +imageNumber,
-      updateImageDto,
-    );
+    @Param('entityId') entityId: number,
+  ): Promise<Image[]> {
+    return this.imageService.findAll(entityType, entityId);
   }
 
-  @Delete()
-  remove(
-    @Param('entityType') entityType: string,
-    @Param('entityId') entityId: string,
-    @Param('imgNumber') imageNumber: string,
-  ): string {
-    return this.imageService.remove(entityType, +entityId, +imageNumber);
+  @Get(':imageName')
+  async findOne(@Param('imageName') imageName: string, @Res() res: Response) {
+    const image: Image = await this.imageService.findOne(imageName);
+    return res.sendFile(image.imagePath);
+  }
+
+  @Delete(':imageName')
+  async remove(@Param('imageName') imageName: string): Promise<string> {
+    return await this.imageService.remove(imageName);
   }
 }
