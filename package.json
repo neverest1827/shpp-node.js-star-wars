@@ -21,7 +21,8 @@
     "typeorm": "typeorm -d dist/data-source.js",
     "typeorm:generate": "npm run build && npm run typeorm migration:generate",
     "typeorm:run": "npm run build && npm run typeorm migration:run",
-    "typeorm:revert": "npm run build && npm run typeorm migration:revert"
+    "typeorm:revert": "npm run build && npm run typeorm migration:revert",
+    "fill-db": "node ./dist/fill_db.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
