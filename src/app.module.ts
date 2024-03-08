@@ -12,6 +12,8 @@ import { VehicleModule } from './vehicle/vehicle.module';
 import { StarshipModule } from './starship/starship.module';
 import { PlanetModule } from './planet/planet.module';
 import { CommonModule } from './common/common.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ResponseInterceptor } from './response.interceptor';
 
 @Module({
   imports: [
@@ -38,6 +40,12 @@ import { CommonModule } from './common/common.module';
     CommonModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+  ],
 })
 export class AppModule {}
