@@ -9,15 +9,14 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   Get,
-  Patch,
-  Body, Res
-} from "@nestjs/common";
+  Res,
+} from '@nestjs/common';
 import { ImageService } from './image.service';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CreateImageDto } from './dto/create-image.dto';
 import { Image } from './entities/image.entity';
-import { Response } from "express";
+import { Response } from 'express';
 
 @Controller('api/v1/image')
 @ApiTags('Image')
