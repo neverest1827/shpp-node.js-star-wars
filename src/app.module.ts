@@ -12,9 +12,10 @@ import { VehicleModule } from './vehicle/vehicle.module';
 import { StarshipModule } from './starship/starship.module';
 import { PlanetModule } from './planet/planet.module';
 import { CommonModule } from './common/common.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './response.interceptor';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ErrorFilter } from './error.filter';
 
 @Module({
   imports: [
@@ -54,6 +55,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ErrorFilter,
     },
   ],
 })
