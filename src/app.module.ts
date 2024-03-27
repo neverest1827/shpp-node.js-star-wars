@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PeopleModule } from './people/people.module';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { ImageModule } from './image/image.module';
 import { ColorModule } from './color/color.module';
 import { GenderModule } from './gender/gender.module';
@@ -14,19 +14,28 @@ import { PlanetModule } from './planet/planet.module';
 import { CommonModule } from './common/common.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './response.interceptor';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'admin',
-      password: 'Zaq1W2e34',
-      database: 'star_wars',
-      entities: ['dist/**/*.entity.js'],
-      migrations: ['dist/migrations/**/*.js'],
-      synchronize: false,
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule], // Для доступа к ConfigService
+      useFactory: async (configService: ConfigService) =>
+        ({
+          type: configService.get<string>('DATABASE_TYPE'),
+          host: configService.get<string>('DATABASE_HOST'),
+          port: configService.get<number>('DATABASE_PORT'),
+          username: configService.get<string>('DATABASE_USERNAME'),
+          password: configService.get<string>('DATABASE_PASSWORD'),
+          database: configService.get<string>('DATABASE_NAME'),
+          entities: ['dist/**/*.entity.js'],
+          migrations: ['dist/migrations/**/*.js'],
+          synchronize: false,
+        }) as TypeOrmModuleAsyncOptions,
+      inject: [ConfigService], // Передача ConfigService в качестве зависимости
     }),
     PeopleModule,
     ImageModule,

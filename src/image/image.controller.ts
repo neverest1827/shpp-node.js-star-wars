@@ -45,18 +45,23 @@ export class ImageController {
     return await this.imageService.create(entityType, +entityId, files);
   }
 
-  @Get()
-  findAll(
+  @Get(':entityType/:entityId')
+  async findAll(
     @Param('entityType') entityType: string,
     @Param('entityId') entityId: number,
-  ): Promise<Image[]> {
-    return this.imageService.findAll(entityType, entityId);
+  ): Promise<string[]> {
+    return await this.imageService.findAll(entityType, entityId);
   }
 
   @Get(':imageName')
   async findOne(@Param('imageName') imageName: string, @Res() res: Response) {
-    const image: Image = await this.imageService.findOne(imageName);
-    return res.sendFile(image.imagePath);
+    try {
+      const image: Buffer = await this.imageService.findOne(imageName);
+      res.setHeader('Content-Type', 'image/jpeg');
+      return res.send(image);
+    } catch (err) {
+      console.error('Error fetching image:', err);
+    }
   }
 
   @Delete(':imageName')

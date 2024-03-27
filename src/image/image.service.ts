@@ -2,8 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Image } from './entities/image.entity';
 import { Repository } from 'typeorm';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { People } from '../people/entities/people.entity';
 import { Film } from '../film/entities/film.entity';
@@ -11,10 +9,17 @@ import { Planet } from '../planet/entities/planet.entity';
 import { Specie } from '../specie/entities/specie.entity';
 import { Starship } from '../starship/entities/starship.entity';
 import { Vehicle } from '../vehicle/entities/vehicle.entity';
+import { NodeJsClient } from '@smithy/types';
+import { ConfigService } from '@nestjs/config';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 
 @Injectable()
 export class ImageService {
-  private uploadDirName: string = 'images';
   private repositories: Rep = {
     people: this.peopleRepository,
     film: this.filmRepository,
@@ -23,7 +28,10 @@ export class ImageService {
     starship: this.starshipRepository,
     vehicle: this.vehicleRepository,
   };
+  private s3Client: NodeJsClient<S3Client> =
+    this.getS3Client() as NodeJsClient<S3Client>;
   constructor(
+    private readonly configService: ConfigService,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
     @InjectRepository(People)
@@ -50,19 +58,6 @@ export class ImageService {
 
     let failed: string;
 
-    try {
-      await fs.access(this.uploadDirName);
-    } catch (err) {
-      await fs.mkdir(this.uploadDirName);
-    }
-
-    const uploadPath: string = path.join(
-      __dirname,
-      '..',
-      '..',
-      this.uploadDirName,
-    );
-
     const repository = this.repositories[entityType];
 
     if (!repository) {
@@ -75,14 +70,23 @@ export class ImageService {
         const entity = await repository.findOne({
           where: { id: entityId },
         });
-        const filePath: string = path.join(uploadPath, imageName);
-        await fs.access(uploadPath);
-        await fs.writeFile(filePath, file.buffer);
 
-        const publicPath: string = `/images/${imageName}`; // Создаем символическую ссылку для доступа к изображению
+        const imagePath: string = `images/${imageName}`;
+
+        const uploadParams = {
+          Bucket: this.configService.get<string>('BUCKET'),
+          Key: imagePath,
+          Body: file.buffer,
+        };
+
+        const command = new PutObjectCommand(uploadParams);
+        const response = await this.s3Client.send(command);
+
+        console.log('File uploaded successfully. ETag:', response.ETag);
+
         const imageEntity: Image = this.imageRepository.create({
           filename: file.originalname,
-          imagePath: publicPath,
+          imagePath: imagePath,
           [entityType.toLowerCase()]: entity,
         });
         await this.imageRepository.save(imageEntity);
@@ -95,42 +99,63 @@ export class ImageService {
     if (failed) return failed;
     return 'All photo upload';
   }
+  getS3Client(): S3Client {
+    const region: string = this.configService.get<string>('REGION');
+    const credentials = {
+      accessKeyId: this.configService.get<string>('ACCESS_KEY_ID'),
+      secretAccessKey: this.configService.get<string>('SECRET_ACCESS_KEY'),
+    };
 
-  async findAll(entityType: string, entityId: number): Promise<Image[]> {
-    return await this.imageRepository.find({
-      where: { [entityType.toLowerCase()]: entityId },
-    });
+    return new S3Client({ region, credentials });
   }
 
-  async findOne(fineName: string): Promise<Image> {
-    return await this.imageRepository.findOne({
+  async findAll(entityType: string, entityId: number): Promise<string[]> {
+    const entity = entityType.toLowerCase();
+    try {
+      const images: Image[] = await this.imageRepository.find({
+        where: { [entity]: { id: entityId } },
+      });
+      return images.map((images) => images.filename);
+    } catch (err) {
+      return [];
+    }
+  }
+
+  async findOne(fineName: string): Promise<Buffer> {
+    const image: Image = await this.imageRepository.findOne({
       where: { filename: fineName },
     });
+    const command = new GetObjectCommand({
+      Bucket: this.configService.get<string>('BUCKET'),
+      Key: image.imagePath,
+    });
+    const { Body } = await this.s3Client.send(command);
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of Body) {
+      chunks.push(chunk);
+    }
+    return Buffer.concat(chunks);
   }
 
   async remove(imageName: string): Promise<string> {
     try {
-      const imageEntity: Image = await this.imageRepository.findOne({
+      const image: Image = await this.imageRepository.findOne({
         where: { filename: imageName },
       });
 
-      if (!imageEntity) {
-        throw new BadRequestException('Image not found');
-      }
+      if (!image) return `Image ${imageName} not found`;
 
-      const imagePath: string = path.join(
-        __dirname,
-        '..',
-        '..',
-        this.uploadDirName,
-        imageName,
-      );
-      await fs.unlink(imagePath);
-      await this.imageRepository.remove(imageEntity);
+      const command = new DeleteObjectCommand({
+        Bucket: this.configService.get<string>('BUCKET'),
+        Key: image.imagePath,
+      });
+
+      await this.s3Client.send(command);
+      await this.imageRepository.remove(image);
       return `Image ${imageName} removed successfully`;
     } catch (err) {
       console.log(`Error removing image: ${err}`);
-      throw new BadRequestException('Failed to remove image');
+      return 'Failed to remove image';
     }
   }
 }
