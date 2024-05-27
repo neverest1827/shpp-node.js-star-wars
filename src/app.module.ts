@@ -12,10 +12,14 @@ import { VehicleModule } from './vehicle/vehicle.module';
 import { StarshipModule } from './starship/starship.module';
 import { PlanetModule } from './planet/planet.module';
 import { CommonModule } from './common/common.module';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ResponseInterceptor } from './response.interceptor';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ErrorFilter } from './error.filter';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { RoleModule } from './role/role.module';
+import { RolesGuard } from './role/role.guard';
 
 @Module({
   imports: [
@@ -48,6 +52,9 @@ import { ErrorFilter } from './error.filter';
     StarshipModule,
     PlanetModule,
     CommonModule,
+    AuthModule,
+    UserModule,
+    RoleModule,
   ],
   controllers: [AppController],
   providers: [
@@ -59,6 +66,10 @@ import { ErrorFilter } from './error.filter';
     {
       provide: APP_FILTER,
       useClass: ErrorFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })
