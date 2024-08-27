@@ -5,27 +5,27 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { People } from '../../people/entities/people.entity';
+import { Person } from '../../people/entities/person.entity';
 import { Film } from '../../film/entities/film.entity';
 import { Planet } from '../../planet/entities/planet.entity';
 import { Specie } from '../../specie/entities/specie.entity';
 import { Starship } from '../../starship/entities/starship.entity';
 import { Vehicle } from '../../vehicle/entities/vehicle.entity';
 
-@Entity()
+@Entity('images')
 export class Image {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   filename: string;
 
   @Column()
-  imagePath: string;
+  url: string;
 
-  @ManyToOne(() => People, (people) => people.images)
-  @JoinColumn({ name: 'people_id' })
-  people: People;
+  @ManyToOne(() => Person, (people) => people.images)
+  @JoinColumn({ name: 'person_id' })
+  people: Person;
 
   @ManyToOne(() => Film, (film) => film.images)
   @JoinColumn({ name: 'film_id' })

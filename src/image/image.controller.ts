@@ -4,47 +4,38 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFiles,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
   Get,
   Res,
+  UploadedFile,
 } from '@nestjs/common';
 import { ImageService } from './image.service';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { CreateImageDto } from './dto/create-image.dto';
 import { Response } from 'express';
+import { Roles } from '../role/role.decorator';
+import { UserRole } from '../role/role.enum';
+import { Public } from '../common/decorators/public.decorator';
+import { OperationResult } from '../common/types/types';
 
-@Controller('api/v1/image')
+@Controller('api/v1/images')
+@ApiBearerAuth('access-token')
 @ApiTags('Image')
 export class ImageController {
   constructor(private readonly imageService: ImageService) {}
 
-  @Post(':entityType/:entityId')
-  @UseInterceptors(AnyFilesInterceptor())
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    type: CreateImageDto,
-  })
+  @ApiBody({ type: CreateImageDto })
   async create(
-    @Param('entityType') entityType: string,
-    @Param('entityId') entityId: string,
-    @UploadedFiles(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1048576 }), //1Mb
-          new FileTypeValidator({ fileType: /image\/(jpeg|png)/ }),
-        ],
-      }),
-    )
-    files: Array<Express.Multer.File>,
-  ): Promise<string> {
-    return await this.imageService.create(entityType, +entityId, files);
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<OperationResult> {
+    return await this.imageService.create(file);
   }
 
   @Get(':entityType/:entityId')
+  @Public()
   async findAll(
     @Param('entityType') entityType: string,
     @Param('entityId') entityId: number,
@@ -53,18 +44,21 @@ export class ImageController {
   }
 
   @Get(':imageName')
-  async findOne(@Param('imageName') imageName: string, @Res() res: Response) {
-    try {
-      const image: Buffer = await this.imageService.findOne(imageName);
-      res.setHeader('Content-Type', 'image/jpeg');
-      return res.send(image);
-    } catch (err) {
-      console.error('Error fetching image:', err);
-    }
+  @Public()
+  async findOne(
+    @Param('imageName') imageName: string,
+    @Res() res: Response,
+  ): Promise<Response> {
+    const { buffer, contentType } = await this.imageService.findOne(imageName);
+    res.setHeader('Content-Type', contentType);
+    return res.send(buffer);
   }
 
   @Delete(':imageName')
-  async remove(@Param('imageName') imageName: string): Promise<string> {
+  @Roles(UserRole.Admin)
+  async remove(
+    @Param('imageName') imageName: string,
+  ): Promise<OperationResult> {
     return await this.imageService.remove(imageName);
   }
 }
