@@ -1,11 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PeopleModule } from './people/people.module';
+import { PersonModule } from './person/person.module';
 import { TypeOrmModule, TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 import { ImageModule } from './image/image.module';
-import { ColorModule } from './color/color.module';
-import { GenderModule } from './gender/gender.module';
 import { FilmModule } from './film/film.module';
 import { SpecieModule } from './specie/specie.module';
 import { VehicleModule } from './vehicle/vehicle.module';
@@ -13,22 +10,30 @@ import { StarshipModule } from './starship/starship.module';
 import { PlanetModule } from './planet/planet.module';
 import { CommonModule } from './common/common.module';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { ResponseInterceptor } from './response.interceptor';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ErrorFilter } from './error.filter';
+import { ErrorFilter } from './common/filters/error.filter';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { RoleModule } from './role/role.module';
 import { RolesGuard } from './role/role.guard';
+import { JwtAuthGuard } from './auth/jwt-auth.guard';
+import { MulterModule } from '@nestjs/platform-express';
+import * as multer from 'multer';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    MulterModule.register({
+      storage: multer.memoryStorage(),
+    }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], // Для доступа к ConfigService
-      useFactory: async (configService: ConfigService) =>
+      imports: [ConfigModule], // To access ConfigService
+      useFactory: async (
+        configService: ConfigService,
+      ): Promise<TypeOrmModuleAsyncOptions> =>
         ({
           type: configService.get<string>('DATABASE_TYPE'),
           host: configService.get<string>('DATABASE_HOST'),
@@ -40,12 +45,10 @@ import { RolesGuard } from './role/role.guard';
           migrations: ['dist/migrations/**/*.js'],
           synchronize: false,
         }) as TypeOrmModuleAsyncOptions,
-      inject: [ConfigService], // Передача ConfigService в качестве зависимости
+      inject: [ConfigService], // Pass ConfigService as a dependency
     }),
-    PeopleModule,
+    PersonModule,
     ImageModule,
-    ColorModule,
-    GenderModule,
     FilmModule,
     SpecieModule,
     VehicleModule,
@@ -58,7 +61,6 @@ import { RolesGuard } from './role/role.guard';
   ],
   controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_INTERCEPTOR,
       useClass: ResponseInterceptor,
@@ -66,6 +68,10 @@ import { RolesGuard } from './role/role.guard';
     {
       provide: APP_FILTER,
       useClass: ErrorFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
