@@ -3,73 +3,119 @@ import {
   IsString,
   IsNumber,
   IsArray,
-  ArrayMinSize,
   ArrayUnique,
-  IsUrl,
+  IsOptional,
+  IsInt,
 } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateSpecieDto {
+  @ApiPropertyOptional({
+    description: 'Name of the species',
+    example: 'Human',
+  })
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Classification of the species',
+    example: 'Mammal',
+  })
   @IsString()
   classification: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Designation of the species',
+    example: 'Sentient',
+  })
   @IsString()
   designation: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Average height of the species in centimeters',
+    example: 170,
+  })
+  @Type(() => Number)
   @IsNumber()
-  average_height: string;
+  average_height: number;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Skin colors of the species',
+    example: 'Fair, Brown, Black',
+  })
   @IsString()
   skin_colors: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Hair colors of the species',
+    example: 'Black, Brown, Blond',
+  })
   @IsString()
   hair_colors: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Eye colors of the species',
+    example: 'Brown, Blue, Green',
+  })
   @IsString()
   eye_colors: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Average lifespan of the species in years',
+    example: 80,
+  })
+  @Type(() => Number)
   @IsNumber()
-  average_lifespan: string;
+  average_lifespan: number;
 
-  @IsNotEmpty()
-  @IsUrl()
-  homeworld: string;
+  @ApiPropertyOptional({
+    description: 'Planet id of the species',
+    example: [],
+  })
+  @IsOptional()
+  @IsArray()
+  @Type(() => Number)
+  @IsInt({ each: true })
+  @ArrayUnique()
+  homeworld: number[];
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Language spoken by the species',
+    example: 'Common',
+  })
   @IsString()
   language: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'List id people belonging to the species',
+    example: [],
+  })
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
+  @Type(() => Number)
+  @IsInt({ each: true })
   @ArrayUnique()
-  people: string[];
+  people: number[];
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'List id films featuring the species',
+    example: [],
+  })
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
+  @Type(() => Number)
+  @IsInt({ each: true })
   @ArrayUnique()
-  films: string[];
+  films: number[];
 
-  @IsNotEmpty()
-  @IsUrl()
-  created: Date;
-
-  @IsNotEmpty()
-  @IsUrl()
-  edited: Date;
-
-  @IsNotEmpty()
-  @IsUrl()
-  url: string;
+  @ApiPropertyOptional({
+    description: 'File names images of the specie',
+    example: [],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images: string[];
 }

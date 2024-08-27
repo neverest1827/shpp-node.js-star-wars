@@ -6,16 +6,17 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { People } from '../../people/entities/people.entity';
+import { Person } from '../../people/entities/person.entity';
 import { Film } from '../../film/entities/film.entity';
 import { Image } from '../../image/entities/image.entity';
+import { Planet } from '../../planet/entities/planet.entity';
 
-@Entity()
+@Entity('species')
 export class Specie {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column()
@@ -24,8 +25,8 @@ export class Specie {
   @Column()
   designation: string;
 
-  @Column()
-  average_height: string;
+  @Column({ nullable: true })
+  average_height: number;
 
   @Column()
   skin_colors: string;
@@ -36,20 +37,24 @@ export class Specie {
   @Column()
   eye_colors: string;
 
-  @Column()
-  average_lifespan: string;
-
   @Column({ nullable: true })
-  homeworld: string | null;
+  average_lifespan: number;
+
+  @ManyToMany(() => Planet, (planet) => planet.species)
+  @JoinTable({
+    name: 'species_planets',
+    joinColumn: { name: 'specie_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'planet_id', referencedColumnName: 'id' },
+  })
+  homeworld: Planet[];
 
   @Column()
   language: string;
 
-  @ManyToMany(() => People, (people) => people.species)
-  people: People[];
+  @ManyToMany(() => Person, (person) => person.species)
+  people: Person[];
 
   @ManyToMany(() => Film, (film) => film.species)
-  @JoinTable({ name: 'specie_film' })
   films: Film[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
