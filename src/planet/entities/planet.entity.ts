@@ -1,31 +1,31 @@
 import {
   Column,
   Entity,
-  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { People } from '../../people/entities/people.entity';
+import { Person } from '../../people/entities/person.entity';
 import { Film } from '../../film/entities/film.entity';
 import { Image } from '../../image/entities/image.entity';
+import { Specie } from '../../specie/entities/specie.entity';
 
-@Entity()
+@Entity('planets')
 export class Planet {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
-  @Column()
-  rotation_period: string;
+  @Column({ nullable: true })
+  rotation_period: number;
 
-  @Column()
-  orbital_period: string;
+  @Column({ nullable: true })
+  orbital_period: number;
 
-  @Column()
-  diameter: string;
+  @Column({ nullable: true })
+  diameter: number;
 
   @Column()
   climate: string;
@@ -36,17 +36,19 @@ export class Planet {
   @Column()
   terrain: string;
 
-  @Column()
-  surface_water: string;
+  @Column({ nullable: true })
+  surface_water: number;
 
-  @Column()
-  population: string;
+  @Column({ type: 'bigint', nullable: true })
+  population: number;
 
-  @OneToMany(() => People, (people) => people.homeworld)
-  residents: People[];
+  @ManyToMany(() => Person, (person) => person.homeworld)
+  residents: Person[];
+
+  @ManyToMany(() => Specie, (specie) => specie.homeworld)
+  species: Specie[];
 
   @ManyToMany(() => Film, (film) => film.planets)
-  @JoinTable({ name: 'planet_film' })
   films: Film[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

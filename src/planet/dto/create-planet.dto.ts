@@ -2,70 +2,112 @@ import {
   IsNotEmpty,
   IsString,
   IsArray,
-  ArrayMinSize,
   ArrayUnique,
-  IsDate,
-  IsUrl,
+  IsOptional,
+  IsNumber,
+  IsInt,
 } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreatePlanetDto {
+  @ApiPropertyOptional({
+    description: 'Name of the planet',
+    example: 'Earth',
+  })
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @IsNotEmpty()
-  @IsString()
-  rotation_period: string;
+  @ApiPropertyOptional({
+    description: 'Rotation period of the planet',
+    example: 24,
+  })
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Rotation period must be a number' })
+  rotation_period: number;
 
-  @IsNotEmpty()
-  @IsString()
-  orbital_period: string;
+  @ApiPropertyOptional({
+    description: 'Orbital period of the planet',
+    example: 365,
+  })
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Orbital period must be a number' })
+  orbital_period: number;
 
-  @IsNotEmpty()
-  @IsString()
-  diameter: string;
+  @ApiPropertyOptional({
+    description: 'Diameter of the planet in kilometers',
+    example: 12742,
+  })
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Diameter must be a number' })
+  diameter: number;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Climate of the planet',
+    example: 'Temperate',
+  })
   @IsString()
   climate: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Gravity of the planet',
+    example: '1 standard',
+  })
   @IsString()
   gravity: string;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'Terrain of the planet',
+    example: 'Forests, mountains, oceans',
+  })
   @IsString()
   terrain: string;
 
-  @IsNotEmpty()
-  @IsString()
-  surface_water: string;
+  @ApiPropertyOptional({
+    description: 'Surface water percentage of the planet',
+    example: 71,
+  })
+  @Type(() => Number)
+  @IsNumber({}, { message: 'Surface water must be a number' })
+  surface_water: number;
 
-  @IsNotEmpty()
-  @IsString()
-  population: string;
+  @ApiPropertyOptional({
+    description: 'Population of the planet',
+    example: 7000000000,
+  })
+  @Type(() => Number)
+  @IsInt({ message: 'Water for the public should be an integer' })
+  population: number;
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'List id residents of the planet',
+    example: [],
+  })
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
+  @Type(() => Number)
+  @IsInt({ each: true })
   @ArrayUnique()
-  residents: string[];
+  residents: number[];
 
-  @IsNotEmpty()
+  @ApiPropertyOptional({
+    description: 'List id films featuring the planet',
+    example: [],
+  })
+  @IsOptional()
   @IsArray()
-  @ArrayMinSize(1)
+  @Type(() => Number)
+  @IsInt({ each: true })
   @ArrayUnique()
-  films: string[];
+  films: number[];
 
-  @IsNotEmpty()
-  @IsDate()
-  created: Date;
-
-  @IsNotEmpty()
-  @IsDate()
-  edited: Date;
-
-  @IsNotEmpty()
-  @IsUrl()
-  url: string;
+  @ApiPropertyOptional({
+    description: 'File names images of the planet',
+    example: [],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images: string[];
 }

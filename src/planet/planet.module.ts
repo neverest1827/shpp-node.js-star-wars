@@ -9,5 +9,6 @@ import { CommonModule } from '../common/common.module';
   imports: [TypeOrmModule.forFeature([Planet]), CommonModule],
   controllers: [PlanetController],
   providers: [PlanetService],
+  exports: [PlanetService],
 })
 export class PlanetModule {}
