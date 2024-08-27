@@ -1,17 +1,17 @@
 import {
   Column,
   Entity,
-  JoinColumn, JoinTable,
+  JoinTable,
   ManyToMany,
-  PrimaryGeneratedColumn
-} from "typeorm";
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { Role } from '../../role/entities/role.entity';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
-  userId: number;
+  id: number;
 
   @Column({ unique: true })
   username: string;
@@ -19,7 +19,11 @@ export class User {
   @Column()
   password: string;
 
-  @ManyToMany(() => Role, (role) => role.users)
-  @JoinTable({ name: 'user_role' })
-  role: Role[];
+  @ManyToMany(() => Role, (role) => role.users, { cascade: true })
+  @JoinTable({
+    name: 'users_roles',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
+  })
+  roles: Role[];
 }
