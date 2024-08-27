@@ -6,42 +6,73 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { StarshipService } from './starship.service';
 import { CreateStarshipDto } from './dto/create-starship.dto';
 import { UpdateStarshipDto } from './dto/update-starship.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Roles } from '../role/role.decorator';
+import { UserRole } from '../role/role.enum';
+import { Public } from '../common/decorators/public.decorator';
+import { Starship } from './entities/starship.entity';
+import { FormSchema, OperationResult } from '../common/types/types';
 
+@Controller('api/v1/starships')
 @ApiTags('Starship')
-@Controller('api/v1/starship')
 export class StarshipController {
   constructor(private readonly starshipService: StarshipService) {}
 
   @Post()
-  create(@Body() createStarshipDto: CreateStarshipDto) {
-    return this.starshipService.create(createStarshipDto);
+  @Roles(UserRole.Admin)
+  @ApiBearerAuth('access-token')
+  create(@Body() dto: CreateStarshipDto): Promise<OperationResult> {
+    return this.starshipService.create(dto);
   }
 
-  @Get()
-  findAll() {
-    return this.starshipService.findAll();
+  @Get('names')
+  @Roles(UserRole.Admin)
+  @ApiBearerAuth('access-token')
+  getNames(): Promise<Starship[]> {
+    return this.starshipService.getNames();
+  }
+
+  @Get('schema')
+  @Roles(UserRole.Admin)
+  @ApiBearerAuth('access-token')
+  getFormSchema(): FormSchema {
+    return this.starshipService.getFormSchema();
+  }
+
+  @Get('items/:numPage/:limit')
+  @Public()
+  getCatalogItems(
+    @Param('numPage', ParseIntPipe) numPage: number,
+    @Param('limit', ParseIntPipe) limit: number,
+  ): Promise<Starship[]> {
+    return this.starshipService.getCatalogItems(numPage, limit);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.starshipService.findOne(+id);
+  @Public()
+  getEntityInfo(@Param('id', ParseIntPipe) id: number): Promise<Starship> {
+    return this.starshipService.getEntityInfo(id);
   }
 
   @Patch(':id')
+  @Roles(UserRole.Admin)
+  @ApiBearerAuth('access-token')
   update(
-    @Param('id') id: string,
-    @Body() updateStarshipDto: UpdateStarshipDto,
-  ) {
-    return this.starshipService.update(+id, updateStarshipDto);
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateStarshipDto,
+  ): Promise<OperationResult> {
+    return this.starshipService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.starshipService.remove(+id);
+  @Roles(UserRole.Admin)
+  @ApiBearerAuth('access-token')
+  remove(@Param('id', ParseIntPipe) id: number): Promise<OperationResult> {
+    return this.starshipService.remove(id);
   }
 }

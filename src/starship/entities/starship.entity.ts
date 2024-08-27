@@ -1,21 +1,20 @@
 import {
   Column,
   Entity,
-  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { People } from '../../people/entities/people.entity';
+import { Person } from '../../people/entities/person.entity';
 import { Film } from '../../film/entities/film.entity';
 import { Image } from '../../image/entities/image.entity';
 
-@Entity()
+@Entity('starships')
 export class Starship {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column()
@@ -24,41 +23,40 @@ export class Starship {
   @Column()
   manufacturer: string;
 
-  @Column()
-  cost_in_credits: string;
+  @Column({ type: 'bigint', nullable: true })
+  cost_in_credits: number;
 
-  @Column()
-  length: string;
+  @Column({ nullable: true })
+  length: number;
 
-  @Column()
-  max_atmosphering_speed: string;
+  @Column({ nullable: true })
+  max_atmosphering_speed: number;
 
-  @Column()
-  crew: string;
+  @Column({ nullable: true })
+  crew: number;
 
-  @Column()
-  passengers: string;
+  @Column({ nullable: true })
+  passengers: number;
 
-  @Column()
-  cargo_capacity: string;
+  @Column({ type: 'bigint', nullable: true })
+  cargo_capacity: number;
 
   @Column()
   consumables: string;
 
-  @Column()
-  hyperdrive_rating: string;
+  @Column({ nullable: true })
+  hyperdrive_rating: number;
 
-  @Column()
-  MGLT: string;
+  @Column({ nullable: true })
+  MGLT: number;
 
   @Column()
   starship_class: string;
 
-  @ManyToMany(() => People, (people) => people.starships)
-  pilots: People[];
+  @ManyToMany(() => Person, (person) => person.starships)
+  pilots: Person[];
 
   @ManyToMany(() => Film, (film) => film.starships)
-  @JoinTable({ name: 'starship_film' })
   films: Film[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

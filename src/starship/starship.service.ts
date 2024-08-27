@@ -2,9 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { CreateStarshipDto } from './dto/create-starship.dto';
 import { UpdateStarshipDto } from './dto/update-starship.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CommonService } from '../common/common.service';
 import { Starship } from './entities/starship.entity';
+import { FormSchema, OperationResult } from '../common/types/types';
+import { Image } from '../image/entities/image.entity';
 
 @Injectable()
 export class StarshipService {
@@ -13,59 +15,222 @@ export class StarshipService {
     private starshipRepository: Repository<Starship>,
     private readonly commonService: CommonService,
   ) {}
-  async create(createStarshipDto: CreateStarshipDto): Promise<Starship> {
+  /**
+   * Creates a new starship entity based on the provided DTO.
+   *
+   * @param {CreateStarshipDto} dto - Data transfer object containing information about the starship to create.
+   * @returns {Promise<OperationResult>} - Result of the operation, indicating success or failure.
+   * @throws {Error} Throws an error if there is an issue with creating or saving the starship.
+   */
+  async create(dto: CreateStarshipDto): Promise<OperationResult> {
     const id: number = (await this.starshipRepository.count()) + 1;
-    const new_starship: Starship = await this.starshipRepository.create({
+    const date: Date = new Date();
+
+    const new_starship: Starship = this.starshipRepository.create({
       id: id,
-      name: createStarshipDto.name,
-      model: createStarshipDto.model,
-      manufacturer: createStarshipDto.manufacturer,
-      cost_in_credits: createStarshipDto.cost_in_credits,
-      length: createStarshipDto.length,
-      max_atmosphering_speed: createStarshipDto.max_atmosphering_speed,
-      crew: createStarshipDto.crew,
-      passengers: createStarshipDto.passengers,
-      cargo_capacity: createStarshipDto.cargo_capacity,
-      consumables: createStarshipDto.consumables,
-      hyperdrive_rating: createStarshipDto.hyperdrive_rating,
-      MGLT: createStarshipDto.MGLT,
-      starship_class: createStarshipDto.starship_class,
-      pilots: [],
-      films: [],
-      created: createStarshipDto.created,
-      edited: createStarshipDto.edited,
+      name: dto.name,
+      model: dto.model,
+      manufacturer: dto.manufacturer,
+      cost_in_credits: dto.cost_in_credits || null,
+      length: dto.length || null,
+      max_atmosphering_speed: dto.max_atmosphering_speed || null,
+      crew: dto.crew || null,
+      passengers: dto.passengers || null,
+      cargo_capacity: dto.cargo_capacity || null,
+      consumables: dto.consumables,
+      hyperdrive_rating: dto.hyperdrive_rating || null,
+      MGLT: dto.MGLT || null,
+      starship_class: dto.starship_class,
+      pilots: await this.commonService.getPeople(dto.pilots),
+      films: await this.commonService.getFilms(dto.films),
+      images: await this.commonService.getImages(dto.images),
+      created: date,
+      edited: date,
       url: this.commonService.createUrl(id, 'starships'),
-      images: [],
     });
-    return this.starshipRepository.save(new_starship);
+
+    await this.starshipRepository.save(new_starship);
+    return { success: true };
   }
 
-  async findAll(): Promise<Starship[]> {
-    return await this.starshipRepository.find();
+  /**
+   * Retrieves a paginated list of catalog items (starships) with related images.
+   *
+   * @param {number} numPage - The page number to retrieve.
+   * @param {number} limit - The number of items per page.
+   * @returns {Promise<Starship[]>} - A promise that resolves to an array of starships with their related images.
+   * @throws {Error} Throws an error if there is an issue with the query execution.
+   */
+  async getCatalogItems(numPage: number, limit: number): Promise<Starship[]> {
+    const offset: number = (numPage - 1) * limit;
+
+    return await this.starshipRepository.find({
+      relations: ['images'],
+      skip: offset,
+      take: limit,
+    });
   }
 
-  async findOne(id: number): Promise<Starship> {
-    return await this.starshipRepository.findOne({ where: { id: id } });
+  /**
+   * Retrieves a list of starships with only their IDs and names. Necessary to create selections on the client side
+   *
+   * @returns {Promise<Person[]>} A promise that resolves to an array of `Starship` objects, each containing the ID and name of a starship.
+   * @throws {Error} Throws an error if there is an issue with the query execution.
+   */
+  async getNames(): Promise<Starship[]> {
+    return await this.starshipRepository
+      .createQueryBuilder('starship')
+      .select(['starship.id', 'starship.name'])
+      .getMany();
   }
 
-  async update(
-    id: number,
-    updateStarshipDto: UpdateStarshipDto,
-  ): Promise<UpdateResult> {
-    const starshipToUpdate: Starship = await this.findOne(id);
-
-    if (!starshipToUpdate) return null;
-
-    Object.assign(starshipToUpdate, updateStarshipDto);
-
-    return await this.starshipRepository.update(id, starshipToUpdate);
+  /**
+   * Returns the schema for a form used to create or update a starship.
+   *
+   * @returns {FormSchema} - The schema object with default values for a starship form.
+   */
+  getFormSchema(): FormSchema {
+    return {
+      name: '',
+      model: '',
+      manufacturer: '',
+      cost_in_credits: '',
+      length: '',
+      max_atmosphering_speed: '',
+      crew: '',
+      passengers: '',
+      cargo_capacity: '',
+      consumables: '',
+      hyperdrive_rating: '',
+      MGLT: '',
+      starship_class: '',
+      pilots: 'people',
+      films: 'films',
+    };
   }
 
-  async remove(id: number): Promise<DeleteResult> {
-    const starshipToUpdate: Starship = await this.findOne(id);
+  /**
+   * Finds a starship by their ID, including related entities.
+   *
+   * @param {number} id - The ID of the starship to find.
+   * @param {string[]} relations - Array of related entity names to include in the query.
+   * @returns {Promise<Starship>} A promise that resolves to the found starship, including related entities.
+   * @throws {Error} If the starship could not be found.
+   */
+  async findOne(id: number, relations: string[]): Promise<Starship> {
+    return await this.starshipRepository.findOne({
+      relations: relations,
+      where: { id },
+    });
+  }
 
-    if (!starshipToUpdate) return null;
+  /**
+   * Retrieves detailed information about a starship entity by their ID, including related entities such as pilots, films and images.
+   *
+   * @param {number} id - The ID of the starship to retrieve.
+   * @returns {Promise<Person>} A promise that resolves to a `Starship` object containing detailed information, including related entities.
+   * @throws {Error} Throws an error if the starship with the given ID does not exist or if there is an issue with the query.
+   */
+  async getEntityInfo(id: number): Promise<Starship> {
+    return await this.starshipRepository
+      .createQueryBuilder('starship')
+      .leftJoin('starship.pilots', 'person')
+      .leftJoin('starship.films', 'film')
+      .leftJoin('starship.images', 'image')
+      .select([
+        'starship.name',
+        'starship.model',
+        'starship.manufacturer',
+        'starship.cost_in_credits',
+        'starship.length',
+        'starship.max_atmosphering_speed',
+        'starship.crew',
+        'starship.passengers',
+        'starship.cargo_capacity',
+        'starship.consumables',
+        'starship.hyperdrive_rating',
+        'starship.MGLT',
+        'starship.starship_class',
+        'person.id',
+        'person.name',
+        'person.url',
+        'film.id',
+        'film.title',
+        'film.url',
+        'image.id',
+        'image.filename',
+        'image.url',
+      ])
+      .where('starship.id = :id', { id })
+      .getOne();
+  }
 
-    return await this.starshipRepository.delete(id);
+  /**
+   * Updates a starship's information by their ID, including related entities and handling image cleanup.
+   *
+   * @param {number} id - The ID of the starship to update.
+   * @param {UpdateStarshipDto} dto - The data transfer object containing the updated starship information.
+   * @returns {Promise<OperationResult>} A promise that resolves to the operation result indicating success.
+   * @throws {Error} If the starship could not be found or updated.
+   */
+  async update(id: number, dto: UpdateStarshipDto): Promise<OperationResult> {
+    const starship: Starship = await this.findOne(id, ['iamges']);
+    const oldImages: Image[] = starship.images;
+
+    const [pilots, films, images] = await Promise.all([
+      this.commonService.getPeople(dto.pilots),
+      this.commonService.getFilms(dto.films),
+      this.commonService.getImages(dto.images),
+    ]);
+
+    Object.assign(starship, {
+      name: dto.name ?? starship.name,
+      model: dto.model ?? starship.model,
+      manufacturer: dto.manufacturer ?? starship.manufacturer,
+      cost_in_credits: dto.cost_in_credits || starship.cost_in_credits,
+      length: dto.length || starship.length,
+      max_atmosphering_speed:
+        dto.max_atmosphering_speed || starship.max_atmosphering_speed,
+      crew: dto.crew || starship.crew,
+      passengers: dto.passengers || starship.passengers,
+      cargo_capacity: dto.cargo_capacity || starship.cargo_capacity,
+      consumables: dto.consumables ?? starship.starship_class,
+      hyperdrive_rating: dto.hyperdrive_rating || starship.hyperdrive_rating,
+      MGLT: dto.MGLT || starship.MGLT,
+      starship_class: dto.starship_class ?? starship.starship_class,
+      edited: new Date(),
+      pilots,
+      films,
+      images,
+    });
+
+    await this.starshipRepository.save(starship);
+
+    if (oldImages.length) {
+      await this.commonService.cleanUpUnusedImages(oldImages, starship.images);
+    }
+
+    return { success: true };
+  }
+
+  /**
+   * Removes a starship by their ID, including cleanup of related entities and images.
+   *
+   * @param {number} id - The ID of the starship to remove.
+   * @returns {Promise<OperationResult>} A promise that resolves to the operation result indicating success.
+   * @throws {Error} If the starship does not exist.
+   */
+  async remove(id: number): Promise<OperationResult> {
+    const starship: Starship = await this.findOne(id, ['images']);
+
+    if (starship.images.length) {
+      await this.commonService.cleanUpUnusedImages(starship.images, []);
+    }
+    starship.images = [];
+
+    await this.starshipRepository.save(starship);
+    await this.starshipRepository.remove(starship);
+
+    return { success: true };
   }
 }
