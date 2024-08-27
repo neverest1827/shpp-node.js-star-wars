@@ -4,7 +4,6 @@ import { RoleService } from './role.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from './role.decorator';
 import { UserRole } from './role.enum';
-import { OperationResult } from '../common/types/types';
 
 @Controller('api/roles')
 @ApiBearerAuth('access-token')

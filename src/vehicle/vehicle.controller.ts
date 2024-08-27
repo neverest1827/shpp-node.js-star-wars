@@ -15,7 +15,6 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
-import { FormSchema, OperationResult } from '../common/types/types';
 import { Vehicle } from './entities/vehicle.entity';
 
 @Controller('api/v1/vehicles')

@@ -19,7 +19,6 @@ import { Public } from './common/decorators/public.decorator';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { Roles } from './role/role.decorator';
 import { UserRole } from './role/role.enum';
-import { RequestWithUser, Token } from './common/types/types';
 
 @Controller()
 @ApiTags('index')

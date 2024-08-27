@@ -6,7 +6,6 @@ import { CommonService } from '../common/common.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { Image } from '../image/entities/image.entity';
-import { FormSchema, OperationResult } from '../common/types/types';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
 
 describe('VehicleService', (): void => {

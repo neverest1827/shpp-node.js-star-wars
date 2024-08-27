@@ -7,7 +7,6 @@ import { CommonService } from '../common/common.service';
 import { CreatePlanetDto } from './dto/create-planet.dto';
 import { UpdatePlanetDto } from './dto/update-planet.dto';
 import { Image } from '../image/entities/image.entity';
-import { FormSchema, OperationResult } from '../common/types/types';
 
 describe('PlanetService', (): void => {
   const mockImage: Image = { id: 1, filename: 'image.jpg' } as Image;

@@ -16,7 +16,6 @@ import { Response } from 'express';
 import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
-import { OperationResult } from '../common/types/types';
 
 @Controller('api/v1/images')
 @ApiBearerAuth('access-token')

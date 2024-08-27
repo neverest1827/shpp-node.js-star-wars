@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Person } from '../../people/entities/person.entity';
+import { Person } from '../../person/entities/person.entity';
 import { Planet } from '../../planet/entities/planet.entity';
 import { Starship } from '../../starship/entities/starship.entity';
 import { Vehicle } from '../../vehicle/entities/vehicle.entity';

@@ -16,7 +16,6 @@ import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
 import { Starship } from './entities/starship.entity';
-import { FormSchema, OperationResult } from '../common/types/types';
 
 @Controller('api/v1/starships')
 @ApiTags('Starship')

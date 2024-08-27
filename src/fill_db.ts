@@ -1,11 +1,10 @@
 import { DataSource, FindOptionsWhere, Repository } from 'typeorm';
-import { Person } from './people/entities/person.entity';
+import { Person } from './person/entities/person.entity';
 import { Planet } from './planet/entities/planet.entity';
 import { Film } from './film/entities/film.entity';
 import { Specie } from './specie/entities/specie.entity';
 import { Vehicle } from './vehicle/entities/vehicle.entity';
 import { Starship } from './starship/entities/starship.entity';
-import { EntityType } from './common/types/types';
 import { ConfigService } from '@nestjs/config';
 import { Image } from './image/entities/image.entity';
 import * as dotenv from 'dotenv';
@@ -660,7 +659,7 @@ async function createEntityLinks(
   targetEntity: string,
   entityData: SwapiEntity,
   repositories: Repositories,
-): Promise<EntityType> {
+): Promise<void> {
   switch (targetEntity) {
     case 'planets':
     case 'vehicles':

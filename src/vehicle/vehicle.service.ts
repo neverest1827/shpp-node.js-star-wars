@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Vehicle } from './entities/vehicle.entity';
 import { Repository } from 'typeorm';
 import { CommonService } from '../common/common.service';
-import { FormSchema, OperationResult } from '../common/types/types';
 import { Image } from '../image/entities/image.entity';
 
 @Injectable()

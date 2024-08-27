@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
-import { Payload, Token, ValidateUser } from '../common/types/types';
 import { Role } from '../role/entities/role.entity';
 
 @Injectable()

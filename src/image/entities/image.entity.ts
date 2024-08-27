@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Person } from '../../people/entities/person.entity';
+import { Person } from '../../person/entities/person.entity';
 import { Film } from '../../film/entities/film.entity';
 import { Planet } from '../../planet/entities/planet.entity';
 import { Specie } from '../../specie/entities/specie.entity';

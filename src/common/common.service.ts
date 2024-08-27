@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Person } from '../people/entities/person.entity';
+import { Person } from '../person/entities/person.entity';
 import { Planet } from '../planet/entities/planet.entity';
 import { Film } from '../film/entities/film.entity';
 import { Specie } from '../specie/entities/specie.entity';
@@ -9,7 +9,6 @@ import { Vehicle } from '../vehicle/entities/vehicle.entity';
 import { Starship } from '../starship/entities/starship.entity';
 import { Image } from '../image/entities/image.entity';
 import { ConfigService } from '@nestjs/config';
-import { EntityType } from './types/types';
 import { ImageService } from '../image/image.service';
 
 @Injectable()

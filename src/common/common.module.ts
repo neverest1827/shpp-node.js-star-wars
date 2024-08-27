@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CommonService } from './common.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Person } from '../people/entities/person.entity';
+import { Person } from '../person/entities/person.entity';
 import { Planet } from '../planet/entities/planet.entity';
 import { Film } from '../film/entities/film.entity';
 import { Specie } from '../specie/entities/specie.entity';

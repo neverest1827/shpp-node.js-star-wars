@@ -16,7 +16,6 @@ import { UserRole } from '../role/role.enum';
 import { Roles } from '../role/role.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { Person } from './entities/person.entity';
-import { FormSchema, OperationResult } from '../common/types/types';
 
 @Controller('api/v1/people')
 @ApiTags('People')

@@ -16,11 +16,6 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { streamToBuffer } from '@jorgeferrero/stream-to-buffer';
-import {
-  Credentials,
-  OperationResult,
-  UploadParams,
-} from '../common/types/types';
 
 @Injectable()
 export class ImageService {

@@ -7,12 +7,11 @@ import { CommonService } from '../common/common.service';
 import { CreateFilmDto } from './dto/create-film.dto';
 import { UpdateFilmDto } from './dto/update-film.dto';
 import { Image } from '../image/entities/image.entity';
-import { Person } from '../people/entities/person.entity';
+import { Person } from '../person/entities/person.entity';
 import { Planet } from '../planet/entities/planet.entity';
 import { Starship } from '../starship/entities/starship.entity';
 import { Vehicle } from '../vehicle/entities/vehicle.entity';
 import { Specie } from '../specie/entities/specie.entity';
-import { FormSchema, OperationResult } from '../common/types/types';
 
 describe('FilmService', () => {
   const mockImage: Image = { id: 1, filename: 'image.jpg' } as Image;

@@ -7,7 +7,6 @@ import { CommonService } from '../common/common.service';
 import { CreateSpecieDto } from './dto/create-specie.dto';
 import { UpdateSpecieDto } from './dto/update-specie.dto';
 import { Image } from '../image/entities/image.entity';
-import { FormSchema, OperationResult } from '../common/types/types';
 
 describe('SpecieService', (): void => {
   const mockImage: Image = { id: 1, filename: 'image.jpg' } as Image;

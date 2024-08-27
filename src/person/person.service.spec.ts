@@ -6,7 +6,6 @@ import { Repository } from 'typeorm';
 import { CommonService } from '../common/common.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
-import { FormSchema, OperationResult } from '../common/types/types';
 import { Image } from '../image/entities/image.entity';
 import { Film } from '../film/entities/film.entity';
 import { Planet } from '../planet/entities/planet.entity';

@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Person } from '../../people/entities/person.entity';
+import { Person } from '../../person/entities/person.entity';
 import { Film } from '../../film/entities/film.entity';
 import { Image } from '../../image/entities/image.entity';
 import { Planet } from '../../planet/entities/planet.entity';
