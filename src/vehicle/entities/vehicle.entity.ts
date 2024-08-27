@@ -1,21 +1,20 @@
 import {
   Column,
   Entity,
-  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { People } from '../../people/entities/people.entity';
+import { Person } from '../../people/entities/person.entity';
 import { Film } from '../../film/entities/film.entity';
 import { Image } from '../../image/entities/image.entity';
 
-@Entity()
+@Entity('vehicles')
 export class Vehicle {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column()
@@ -24,23 +23,23 @@ export class Vehicle {
   @Column()
   manufacturer: string;
 
-  @Column()
-  cost_in_credits: string;
+  @Column({ type: 'bigint', nullable: true })
+  cost_in_credits: number;
 
-  @Column()
-  length: string;
+  @Column({ nullable: true })
+  length: number;
 
-  @Column()
-  max_atmosphering_speed: string;
+  @Column({ nullable: true })
+  max_atmosphering_speed: number;
 
-  @Column()
-  crew: string;
+  @Column({ nullable: true })
+  crew: number;
 
-  @Column()
-  passengers: string;
+  @Column({ nullable: true })
+  passengers: number;
 
-  @Column()
-  cargo_capacity: string;
+  @Column({ type: 'bigint', nullable: true })
+  cargo_capacity: number;
 
   @Column()
   consumables: string;
@@ -48,11 +47,10 @@ export class Vehicle {
   @Column()
   vehicle_class: string;
 
-  @ManyToMany(() => People, (people) => people.vehicles)
-  pilots: People[];
+  @ManyToMany(() => Person, (person) => person.vehicles)
+  pilots: Person[];
 
   @ManyToMany(() => Film, (film) => film.vehicles)
-  @JoinTable({ name: 'vehicle_film' })
   films: Film[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
