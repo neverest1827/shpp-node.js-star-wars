@@ -1,26 +1,27 @@
 import {
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { People } from '../../people/entities/people.entity';
+import { Person } from '../../people/entities/person.entity';
 import { Planet } from '../../planet/entities/planet.entity';
 import { Starship } from '../../starship/entities/starship.entity';
 import { Vehicle } from '../../vehicle/entities/vehicle.entity';
 import { Specie } from '../../specie/entities/specie.entity';
 import { Image } from '../../image/entities/image.entity';
 
-@Entity()
+@Entity('films')
 export class Film {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   title: string;
 
-  @Column()
+  @Column({ nullable: true })
   episode_id: number;
 
   @Column({ type: 'text' })
@@ -35,19 +36,44 @@ export class Film {
   @Column()
   release_date: string;
 
-  @ManyToMany(() => People, (people) => people.films)
-  characters: People[];
+  @ManyToMany(() => Person, (person) => person.films, { cascade: true })
+  @JoinTable({
+    name: 'films_people',
+    joinColumn: { name: 'film_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'people_id', referencedColumnName: 'id' },
+  })
+  characters: Person[];
 
-  @ManyToMany(() => Planet, (planet) => planet.films)
+  @ManyToMany(() => Planet, (planet) => planet.films, { cascade: true })
+  @JoinTable({
+    name: 'films_planets',
+    joinColumn: { name: 'film_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'planet_id', referencedColumnName: 'id' },
+  })
   planets: Planet[];
 
-  @ManyToMany(() => Starship, (starship) => starship.films)
+  @ManyToMany(() => Starship, (starship) => starship.films, { cascade: true })
+  @JoinTable({
+    name: 'films_starships',
+    joinColumn: { name: 'film_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'starship_id', referencedColumnName: 'id' },
+  })
   starships: Starship[];
 
-  @ManyToMany(() => Vehicle, (vehicle) => vehicle.films)
+  @ManyToMany(() => Vehicle, (vehicle) => vehicle.films, { cascade: true })
+  @JoinTable({
+    name: 'films_vehicles',
+    joinColumn: { name: 'film_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'vehicle_id', referencedColumnName: 'id' },
+  })
   vehicles: Vehicle[];
 
-  @ManyToMany(() => Specie, (specie) => specie.films)
+  @ManyToMany(() => Specie, (specie) => specie.films, { cascade: true })
+  @JoinTable({
+    name: 'films_species',
+    joinColumn: { name: 'film_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'specie_id', referencedColumnName: 'id' },
+  })
   species: Specie[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
