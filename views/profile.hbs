@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.6/ejs.min.js"></script>
+  <link rel="stylesheet" href="./../style/reset.css">
+  <link rel="stylesheet" href="./../style/global.css">
+  <link rel="stylesheet" href="./../style/profile.css">
+  <title>Document</title>
+</head>
+<body>
+{{> header }}
+<main>
+  <section class="profile">
+    <div class="container">
+      <div class="profile__inner">
+        <img class="profile__img" src="https://star-wars-storage.s3.amazonaws.com/images/57bb8bb2-f8dc-429b-be23-a17efad1b994_no-image.png" alt="user image">
+        <div class="profile__info-box">
+          <h2 class="profile__info-title">Информация о пользователе:</h2>
+          <ul class="profile__info content"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+  {{> loader }}
+  {{> modal }}
+</main>
+{{> footer}}
+<script type="text/template" id="profile-card-template">
+  <li class="profile__info-item">
+    User name: <%= data.username %>
+  </li>
+  <li class="profile__info-item">
+    Roles: <%= data.roles.map(r => r.value).join(', ') %>
+  </li>
+  <li class="profile__info-item profile__info-links">
+    <% if (data.roles.some(r => r.value === 'admin')) { %>
+    <a class="profile__info-link admin" href="/admin">Админ панель</a>
+    <% } %>
+  </li>
+</script>
+<script src="./../js/common.js"></script>
+<script type="module" src="./../js/profile.js"></script>
+</body>
+</html>

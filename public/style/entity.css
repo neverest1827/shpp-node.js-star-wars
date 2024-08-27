@@ -1,0 +1,21 @@
+.swiper {
+    width: 300px;
+    height: 300px;
+}
+
+.entity__inner {
+    padding: 100px 0;
+    display: flex;
+    gap: 50px;
+}
+
+.entity__list-item {
+    display: flex;
+    margin-bottom: 8px;
+    gap: 10px;
+}
+
+.entity__link {
+    display: inline-block;
+    margin-bottom: 5px;
+}

@@ -1,0 +1,40 @@
+.profile__inner {
+    padding: 100px 0;
+    display: flex;
+    column-gap: 50px;
+}
+
+.profile__img {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.profile__info-title{
+    margin-bottom: 10px;
+}
+
+.profile__info {
+    margin-bottom: 50px;
+}
+
+.profile__info-links{
+    padding-top: 10px;
+}
+
+.profile__info-link {
+    display: inline-block;
+    font-size: 16px;
+    text-decoration: none;
+    padding: 15px 30px;
+    border-radius: 4px;
+    background-color: #333;
+    margin-right: 20px;
+    color: #fff;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+
+
+

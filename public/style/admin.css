@@ -1,0 +1,161 @@
+.tabs__list {
+    display: flex;
+    list-style: none;
+    justify-content: center;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+.tabs__item {
+    margin: 0 10px;
+}
+
+.tabs__item-link {
+    display: block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.tabs__item-link--active{
+    background-color: #333;
+    color: #fff;
+}
+
+.tabs__item-link:hover{
+    background-color: #333;
+    color: #fff;
+}
+
+/*-----------------------------------------------------Form-----------------------------------------------------------*/
+
+.admin__form {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    padding: 50px 50px 30px;
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+
+.admin__form-item{
+    margin-top: 5px;
+}
+
+.admin__form-item:first-child {
+    margin-top: 0;
+}
+
+.admin__form-info{
+    flex-direction: column;
+    gap: 20px;
+    align-items: start;
+}
+
+.admin__form-group {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.admin__form--visible {
+    display: flex;
+}
+
+.admin__form-label {
+    display: block;
+    font-weight: bold;
+    padding: 10px 20px;
+    width: 150px;
+    align-self: start;
+}
+
+.admin__form-input,
+.admin__form-select{
+    width: 250px;
+    padding: 10px 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.admin__form-submit,
+.admin__form-btn{
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #000;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    align-self: start;
+}
+
+.admin__form-text {
+    margin-bottom: 20px;
+}
+
+.admin__form-btn--invisible {
+    visibility: hidden;
+}
+
+.submit:hover {
+    background-color: #45a049;
+}
+
+.admin__form-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.admin__form-wrapper > img {
+    width: 200px;
+}
+
+#image-input {
+    display: none;
+    margin-bottom: 10px;
+}
+
+#image-input + label {
+    background-color: #000;
+    color: #fff;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#image-input + label:hover {
+    background-color: #333;
+}
+
+.admin__form-wrapper .image-container {
+    position: relative;
+    display: inline-block;
+    margin: 10px;
+}
+
+.admin__form-wrapper img {
+    max-width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.image-container .delete-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    color: red;
+    border: none;
+    cursor: pointer;
+    border-radius: 0 8px;
+    font-size: 24px;
+}

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.6/ejs.min.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+  />
+  <link rel="stylesheet" href="../style/reset.css">
+  <link rel="stylesheet" href="../style/global.css">
+  <link rel="stylesheet" href="../style/entity.css">
+  <title>Document</title>
+</head>
+<body>
+{{> header }}
+<main>
+  <section class="entity">
+    <div class="container">
+      <div class="entity__inner content"></div>
+    </div>
+  </section>
+  {{> loader }}
+  {{> modal }}
+</main>
+{{> footer }}
+
+<script type="text/template" id="entity-card-template">
+  <div class="entity__images">
+    <div class="swiper">
+      <div class="swiper-wrapper">
+        <% if (data.images && data.images.length > 0) { %>
+        <% data.images.forEach((image) => { %>
+        <div class="swiper-slide">
+          <img class="entity_img" src="<%= image.url %>" alt="image">
+        </div>
+        <% }) %>
+        <% } else { %>
+        <div class="swiper-slide">
+          <img class="entity_img" src="https://star-wars-storage.s3.amazonaws.com/images/57bb8bb2-f8dc-429b-be23-a17efad1b994_no-image.png" alt="image">
+        </div>
+        <% } %>
+      </div>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+  <ul class="entity__list">
+    <% Object.keys(data).forEach((key) => { %>
+    <% if (key === 'images') return; %>
+    <li class="entity__list-item">
+      <div>
+        <strong><%= key.replace('_', ' ') %>:</strong>
+      </div>
+      <div>
+      <% if (Array.isArray(data[key]) && data[key].length > 0) { %>
+      <%- data[key].map((item) => {
+      return `<a class="entity__link" href="${item.url}">${item.title || item.name}</a>`
+      }).join(', ') %>
+      <% } else if (Array.isArray(data[key])) { %>
+      <span>None</span>
+      <% } else if (data[key]) { %>
+      <span><%= data[key] %></span>
+      <% } else {%>
+        <span>unknown</span>
+      <% } %>
+      </div>
+    </li>
+    <% }) %>
+  </ul>
+</script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="./../js/common.js"></script>
+<script type="module" src="./../js/entity.js"></script>
+</body>
+</html>

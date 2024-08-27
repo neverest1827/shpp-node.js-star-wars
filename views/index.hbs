@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <script src="https://cdn.jsdelivr.net/npm/ejs@3.1.6/ejs.min.js"></script>
+  <link rel="stylesheet" href="./style/reset.css">
+  <link rel="stylesheet" href="./style/global.css">
+  <link rel="stylesheet" href="./style/main.css">
+  <title>Star Wars</title>
+</head>
+<body>
+{{> header }}
+<main>
+  {{> tabs }}
+  <section class="catalog">
+    <div class="container">
+      <div class="catalog__inner">
+        <ul class="catalog__list"></ul>
+        <button id="load-more" class="catalog__btn" data-page="1">Show More</button>
+      </div>
+    </div>
+  </section>
+  {{> loader }}
+  {{> modal }}
+</main>
+{{> footer }}
+<script type="text/template" id="catalog-template">
+  <ul class="catalog__list">
+    <% data.forEach((item) => { %>
+    <li class="catalog__item">
+      <a class="catalog__link" href="/<%= entity %>/<%= item.id%>" >
+        <% if (item.images[0]) { %>
+        <img class="catalog__item-img" src="<%= item.images[0].url %>" alt="" >
+        <% } else { %>
+        <img class="catalog__item-img" src="https://star-wars-storage.s3.amazonaws.com/images/57bb8bb2-f8dc-429b-be23-a17efad1b994_no-image.png" alt="" >
+        <% } %>
+        <p class="catalog__text"><%= item.name || item.title %></p>
+      </a>
+    </li>
+    <% }); %>
+  </ul>
+</script>
+<script src="./js/common.js"></script>
+<script type="module" src="./js/index.js"></script>
+</body>
+</html>

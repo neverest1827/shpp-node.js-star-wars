@@ -1,0 +1,97 @@
+<ul class="tabs__list">
+  <li class="tabs__item">
+    <a class="tabs__item-link tabs__item-link--active" href="" data-action="create">Create</a>
+  </li>
+  <li class="tabs__item">
+    <a class="tabs__item-link" href=""  data-action="update">Update</a>
+  </li>
+  <li class="tabs__item">
+    <a class="tabs__item-link" href="" data-action="delete">Delete</a>
+  </li>
+</ul>
+<form class="admin__form admin__form-first"></form>
+<form class="admin__form admin__form-info"></form>
+
+<script type="text/template" id="control-form-template">
+  <div class="admin__form-group">
+    <label class="admin__form-label" for="select-entity">Select entity</label>
+    <select id="select-entity" class="admin__form-select">
+      <% entities.forEach((entity) => { %>
+      <option class="admin__form-option" value="<%= entity %>"><%= entity.charAt(0).toUpperCase() + entity.slice(1) %></option>
+      <% }); %>
+    </select>
+    <div></div>
+  </div>
+  <% if (action === 'update' || action === 'delete') { %>
+  <div class="admin__form-group">
+    <label class="admin__form-label" for="select-name">Name</label>
+    <select id="select-name" class="admin__form-select"></select>
+  </div>
+  <% } if (action === 'delete') { %>
+  <button type="submit" class="admin__form-submit">Delete</button>
+  <% } else { %>
+  <button type="submit" class="admin__form-submit">Next</button>
+  <% } %>
+</script>
+
+
+<script type="text/template" id="select-name-template">
+  <% data.forEach(function(item) { %>
+  <option class="admin__form-option" value="<%= item.id %>"><%= item.name || item.title %></option>
+  <% }); %>
+</script>
+
+
+<script type="text/template" id="create-form-template">
+  <h4 class="admin__form-text">If you don't want to specify a field just leave it blank</h4>
+  <% for (const key in data.schema) { %>
+  <% if (data.schema[key]) { %>
+  <div class="admin__form-group">
+    <label class="admin__form-label" for="select_<%= key %>"><%= key.charAt(0).toUpperCase() + key.slice(1).replaceAll('_', ' ') %>:</label>
+    <ul id="list__<%= key %>" class="admin__form-list">
+      <li class="admin__form-item">
+        <select id="select_<%= key %>" class="admin__form-select select_<%= key %>" name="<%= key %>">
+          <option class="admin__form-option" value="none">None</option>
+          <% data[data.schema[key]].forEach((entity) => { %>
+          <option class="admin__form-option" value="<%= entity.id %>"><%= entity.name || entity.title %></option>
+          <% }) %>
+        </select>
+        <button class="admin__form-btn admin__form-btn--invisible" type="button" disabled>X</button>
+      </li>
+    </ul>
+    <% if (!((entity === 'people' && (data.schema[key] === 'planets' || data.schema[key] === 'species')) ||
+    (entity === 'species' && data.schema[key] === 'planets'))) { %>
+    <button class="admin__form-btn admin__form-create" type="button" onclick="view.renderSelect('<%= key %>')">Добавить поле</button>
+    <% } %>
+  </div>
+  <% } else { %>
+  <div class="admin__form-group">
+    <label class="admin__form-label" for="<%= key %>"><%= key.charAt(0).toUpperCase() + key.slice(1).replaceAll('_', ' ') %>:</label>
+    <input class="admin__form-input" type="text" id="<%= key %>" name="<%= key %>" <%= (key === 'name' || key === 'title') ? 'required' : '' %>>
+  </div>
+  <% } %>
+  <% } %>
+  <div class="admin__form-group">
+    <input type="file" id="image-input" name="images" accept="image/*" multiple>
+    <label for="image-input">Выбрать файлы</label>
+  </div>
+  <div id="preview" class="admin__form-wrapper"></div>
+  <button class="admin__form-btn" type="submit">Отправить</button>
+</script>
+
+
+<script type="text/template" id="create-select">
+  <li class="admin__form-item">
+    <select class="admin__form-select <%= selectClass %>">
+      <option class="admin__form-option" value="none">None</option>
+      <% data.forEach((item) => { %>
+      <% if (id && item.id == id) { %>
+      <option class="admin__form-option" value="<%= item.id %>" selected><%= item.name || item.title%></option>
+      <% } else { %>
+      <option class="admin__form-option" value="<%= item.id %>"><%= item.name || item.title %></option>
+      <% } %>
+      <% }) %>
+    </select>
+    <button class="admin__form-btn" type="button" onclick="view.removeSelect(this.parentNode)">X</button>
+  </li>
+</script>
