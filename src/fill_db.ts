@@ -7,11 +7,10 @@ import { Vehicle } from './vehicle/entities/vehicle.entity';
 import { Starship } from './starship/entities/starship.entity';
 import { ConfigService } from '@nestjs/config';
 import { Image } from './image/entities/image.entity';
-import * as dotenv from 'dotenv';
+import { config } from 'dotenv';
 import {
   ApiEndpoints,
   Repositories,
-  SimpleTypeDatabase,
   SwapiData,
   SwapiEntity,
   SwapiFilm,
@@ -23,6 +22,8 @@ import {
 } from './common/types/swapi-types';
 import { User } from './user/entities/user.entity';
 import { Role } from './role/entities/role.entity';
+import { AppDataSource } from './data-source';
+import { UserRole } from './role/role.enum';
 
 const entities: EntityType[] = [
   Person,
@@ -36,21 +37,10 @@ const entities: EntityType[] = [
   Role,
 ];
 
-const roleValues: string[] = ['user', 'admin'];
+const roleValues: string[] = [UserRole.Admin, UserRole.User];
 
-dotenv.config();
+config();
 const configService: ConfigService = new ConfigService();
-const type: string = configService.get<string>('DATABASE_TYPE');
-
-if (!['mysql', 'mariadb', 'postgres', 'sqlite', 'mssql'].includes(type)) {
-  throw new Error(`Invalid database type: ${type}`);
-}
-
-const host: string = configService.get<string>('DATABASE_HOST');
-const username: string = configService.get<string>('DATABASE_USERNAME');
-const password: string = configService.get<string>('DATABASE_PASSWORD');
-const name: string = configService.get<string>('DATABASE_NAME');
-const database_port: number = configService.get<number>('DATABASE_PORT');
 const server_port: number = configService.get<number>('SERVER_PORT', 3000);
 
 /**
@@ -136,8 +126,6 @@ async function getApiEndpoints(): Promise<ApiEndpoints> {
  */
 async function fillDB(): Promise<void> {
   const swapiData: SwapiData = await getSwapiData();
-
-  const AppDataSource: DataSource = getAppdataSource(entities);
   await AppDataSource.initialize();
 
   const repositories: Repositories = await getRepositories(
@@ -231,28 +219,6 @@ async function getDataInfo<T extends SwapiEntity>(
 async function fetchJsonData(url: string): Promise<SwapiEntity> {
   const response: Response = await fetch(url);
   return await response.json();
-}
-
-/**
- * Creates and returns a new `DataSource` instance configured with the provided entities.
- *
- * @param {EntityType[]} entities - An array of entity classes to be included in the `DataSource`.
- * @returns {DataSource} A configured `DataSource` instance.
- */
-function getAppdataSource(entities: EntityType[]): DataSource {
-  return new DataSource({
-    type: type as SimpleTypeDatabase,
-    host: host,
-    port: database_port,
-    username: username,
-    password: password,
-    database: name,
-    synchronize: false,
-    logging: false,
-    entities: entities,
-    migrations: ['./migrations/**/*.js'],
-    subscribers: [],
-  });
 }
 
 /**
