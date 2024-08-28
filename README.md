@@ -60,9 +60,6 @@ SERVER_PORT=3000
 # perform migration
 $ npm run typeorm:run
 
-# compilation
-$ npm run build
-
 # fill the database
 $ npm run fill-db
 
