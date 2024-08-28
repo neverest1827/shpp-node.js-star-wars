@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from './entities/role.entity';
 import { Repository } from 'typeorm';
@@ -53,7 +53,7 @@ export class RoleService {
     const deleted_role: Role = await this.findOne(value);
 
     if (!deleted_role) {
-      throw new NotFoundException('Default role not exist!')
+      throw new NotFoundException('Default role not exist!');
     }
 
     await this.roleRepository.remove(deleted_role);

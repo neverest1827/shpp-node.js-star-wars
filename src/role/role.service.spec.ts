@@ -1,14 +1,14 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { getRepositoryToken } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { RoleService } from "./role.service";
-import { Role } from "./entities/role.entity";
-import { NotFoundException } from "@nestjs/common";
-import { UserRole } from "./role.enum";
+import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { RoleService } from './role.service';
+import { Role } from './entities/role.entity';
+import { NotFoundException } from '@nestjs/common';
+import { UserRole } from './role.enum';
 
 describe('RoleService', (): void => {
   const mockRole: Role = { id: 1, value: UserRole.User } as Role;
-  
+
   let roleService: RoleService;
   let roleRepository: Repository<Role>;
 
