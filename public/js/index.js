@@ -42,7 +42,7 @@ async function fetchCatalogItems(entity, numPage, limit) {
     `/api/v1/${entity}/items/${numPage}/${limit}`,
   );
   const result = await response.json();
-  return result.data || [];
+  return result.data;
 }
 
 function addListeners() {

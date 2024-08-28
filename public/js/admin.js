@@ -1,10 +1,10 @@
 import {
   addLogoutListener,
+  checkAuthorization,
   handleLogout,
   NAV_CHANGE_INTERVAL,
-  checkAuthorization,
 } from './authorization.js';
-import { fetchData, handleError, throwHTTPError } from './general.js';
+import { fetchData } from './general.js';
 
 const entities = [
   'people',
@@ -36,20 +36,22 @@ async function fetchAdminInterfaceMarkup() {
       Authorization: `Bearer ${user.token}`,
     },
   });
-  const markup = await response.text();
-  return markup ?? '';
+  return await response.text();
 }
 
 function addListeners() {
   document
-    .querySelector('.admin__form-info')
-    .addEventListener('submit', handleInfoFormSubmit);
-  document
     .querySelector('.admin__form-first')
     .addEventListener('submit', handleControlFormSubmit);
+
+  document
+    .querySelector('.admin__form-info')
+    .addEventListener('submit', handleInfoFormSubmit);
+
   document.querySelectorAll('.tabs__item-link').forEach((tab) => {
     tab.addEventListener('click', handleTabClick);
   });
+
   addLogoutListener();
 }
 
@@ -90,7 +92,7 @@ async function getEntityNames(entity) {
     },
   });
   const result = await response.json();
-  return result.data ?? [];
+  return result.data;
 }
 
 async function handleControlFormSubmit(e) {
@@ -136,7 +138,7 @@ async function deleteEntity(entity, id) {
     },
   });
   const result = await response.json();
-  return result.data ?? {};
+  return result.data;
 }
 
 async function createEntity(entity) {
@@ -158,7 +160,7 @@ async function getFormSchema(entity) {
     },
   });
   const result = await response.json();
-  return result.data ?? {};
+  return result.data;
 }
 
 async function getDataToCreateForm(formSchema) {
@@ -271,7 +273,7 @@ async function getDataToFillFormValues(entity, id) {
     },
   });
   const result = await response.json();
-  return result.data ?? {};
+  return result.data;
 }
 
 function fillForm(dataFormValues) {
@@ -363,13 +365,14 @@ async function saveImage(formData, file) {
     body: uploadData,
   });
   const result = await response.json();
-  return result.data ?? {};
+  return result.data;
 }
 
 function buildRequestData(formData) {
   const allEntities = [...entities, 'images'];
   const data = {};
   formData.forEach((value, key) => {
+    console.log(value, key);
     if (allEntities.includes(key)) {
       if (!data[key]) {
         data[key] = [];
@@ -382,6 +385,7 @@ function buildRequestData(formData) {
     }
   });
 
+  // Process and add the values of the selections to the date
   document.querySelectorAll('.admin__form-list').forEach((list) => {
     const key = list.id.replace('list__', '');
     data[key] = [];

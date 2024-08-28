@@ -48,5 +48,5 @@ function extractParams() {
 async function fetchEntityInfo(params){
   const response = await fetchData(`/api/v1/${params.entity}/${params.id}`)
   const result = await response.json();
-  return result.data || {};
+  return result.data;
 }

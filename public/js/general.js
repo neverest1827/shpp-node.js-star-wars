@@ -21,13 +21,13 @@ export async function fetchData(url, options = {}) {
   }
 }
 
-export function throwHTTPError(status, message){
+function throwHTTPError(status, message){
   throw new Error(
     `HTTP error! status: ${status} - ${message}`,
   );
 }
 
-export function handleError(err) {
+function handleError(err) {
   alert(err);
   console.error(err);
 }

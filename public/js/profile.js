@@ -28,5 +28,5 @@ async function fetchUserInfo() {
     }
   });
   const result = await response.json();
-  return result.data || {};
+  return result.data;
 }
