@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
@@ -60,6 +60,11 @@ export class UserService {
     const user: User = await this.usersRepository.findOne({
       where: { username },
     });
+
+    if (!user) {
+      throw new NotFoundException(`User with username ${username} not found`);
+    }
+
     await this.usersRepository.delete(user);
     return { success: true };
   }
