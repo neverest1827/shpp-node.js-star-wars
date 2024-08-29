@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Person } from './entities/person.entity';
 import { Repository } from 'typeorm';
 import { CommonService } from '../common/common.service';
+import { Person } from './entities/person.entity';
 import { Image } from '../image/entities/image.entity';
+import { Planet } from '../planet/entities/planet.entity';
+import { Film } from '../film/entities/film.entity';
+import { Specie } from '../specie/entities/specie.entity';
+import { Vehicle } from '../vehicle/entities/vehicle.entity';
+import { Starship } from '../starship/entities/starship.entity';
 
 @Injectable()
 export class PersonService {
@@ -23,11 +28,14 @@ export class PersonService {
    * @throws {Error} Throws an error if there is an issue with creating or saving the person.
    */
   async create(dto: CreatePersonDto): Promise<OperationResult> {
-    const id: number = (await this.personRepository.count()) + 1;
+    const id: number = await this.commonService.getId(this.personRepository);
     const date: Date = new Date();
 
+    const [homeworld, films, species, vehicles, starships, images] =
+      await this.getAllLinks(dto);
+
     const new_people: Person = this.personRepository.create({
-      id: id,
+      id,
       name: dto.name,
       height: dto.height || null,
       mass: dto.mass || null,
@@ -36,18 +44,19 @@ export class PersonService {
       eye_color: dto.eye_color,
       birth_year: dto.birth_year,
       gender: dto.gender,
-      homeworld: await this.commonService.getPlanets(dto.homeworld),
-      films: await this.commonService.getFilms(dto.films),
-      species: await this.commonService.getSpecies(dto.species),
-      vehicles: await this.commonService.getVehicles(dto.vehicles),
-      starships: await this.commonService.getStarships(dto.starships),
-      images: await this.commonService.getImages(dto.images),
+      homeworld,
+      films,
+      species,
+      vehicles,
+      starships,
+      images,
       created: date,
       edited: date,
       url: this.commonService.createUrl(id, 'people'),
     });
 
     await this.personRepository.save(new_people);
+    console.log((await this.personRepository.count()) + 1);
     return { success: true };
   }
 
@@ -181,14 +190,7 @@ export class PersonService {
     const oldImages: Image[] = person.images;
 
     const [homeworld, films, species, vehicles, starships, images] =
-      await Promise.all([
-        this.commonService.getPlanets(dto.homeworld),
-        this.commonService.getFilms(dto.films),
-        this.commonService.getSpecies(dto.species),
-        this.commonService.getVehicles(dto.vehicles),
-        this.commonService.getStarships(dto.starships),
-        this.commonService.getImages(dto.images),
-      ]);
+      await this.getAllLinks(dto);
 
     Object.assign(person, {
       name: dto.name ?? person.name,
@@ -236,5 +238,26 @@ export class PersonService {
     await this.personRepository.remove(person);
 
     return { success: true };
+  }
+
+  /**
+   * Retrieves all related entities for a person.
+   *
+   * @param { CreatePersonDto | UpdatePersonDto } dto - The data transfer object containing the identifiers for
+   * entities to retrieve.
+   * @returns { Promise<[Planet[], Film[], Specie[], Vehicle[], Starship[], Image[]]> } A promise that resolves to a
+   * tuple containing arrays of entities:
+   */
+  async getAllLinks(
+    dto: CreatePersonDto | UpdatePersonDto,
+  ): Promise<[Planet[], Film[], Specie[], Vehicle[], Starship[], Image[]]> {
+    return await Promise.all([
+      this.commonService.getPlanets(dto.homeworld),
+      this.commonService.getFilms(dto.films),
+      this.commonService.getSpecies(dto.species),
+      this.commonService.getVehicles(dto.vehicles),
+      this.commonService.getStarships(dto.starships),
+      this.commonService.getImages(dto.images),
+    ]);
   }
 }

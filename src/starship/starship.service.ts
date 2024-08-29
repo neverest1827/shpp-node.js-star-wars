@@ -6,6 +6,8 @@ import { Repository } from 'typeorm';
 import { CommonService } from '../common/common.service';
 import { Starship } from './entities/starship.entity';
 import { Image } from '../image/entities/image.entity';
+import { Person } from '../person/entities/person.entity';
+import { Film } from '../film/entities/film.entity';
 
 @Injectable()
 export class StarshipService {
@@ -22,11 +24,13 @@ export class StarshipService {
    * @throws {Error} Throws an error if there is an issue with creating or saving the starship.
    */
   async create(dto: CreateStarshipDto): Promise<OperationResult> {
-    const id: number = (await this.starshipRepository.count()) + 1;
+    const id: number = await this.commonService.getId(this.starshipRepository);
     const date: Date = new Date();
 
+    const [pilots, films, images] = await this.getAllLinks(dto);
+
     const new_starship: Starship = this.starshipRepository.create({
-      id: id,
+      id,
       name: dto.name,
       model: dto.model,
       manufacturer: dto.manufacturer,
@@ -40,9 +44,9 @@ export class StarshipService {
       hyperdrive_rating: dto.hyperdrive_rating || null,
       MGLT: dto.MGLT || null,
       starship_class: dto.starship_class,
-      pilots: await this.commonService.getPeople(dto.pilots),
-      films: await this.commonService.getFilms(dto.films),
-      images: await this.commonService.getImages(dto.images),
+      pilots,
+      films,
+      images,
       created: date,
       edited: date,
       url: this.commonService.createUrl(id, 'starships'),
@@ -176,11 +180,7 @@ export class StarshipService {
     const starship: Starship = await this.findOne(id, ['iamges']);
     const oldImages: Image[] = starship.images;
 
-    const [pilots, films, images] = await Promise.all([
-      this.commonService.getPeople(dto.pilots),
-      this.commonService.getFilms(dto.films),
-      this.commonService.getImages(dto.images),
-    ]);
+    const [pilots, films, images] = await this.getAllLinks(dto);
 
     Object.assign(starship, {
       name: dto.name ?? starship.name,
@@ -231,5 +231,23 @@ export class StarshipService {
     await this.starshipRepository.remove(starship);
 
     return { success: true };
+  }
+
+  /**
+   * Retrieves all related entities for a starship.
+   *
+   * @param { CreateStarshipDto | UpdateStarshipDto } dto - The data transfer object containing the identifiers for
+   * entities to retrieve.
+   * @returns { Promise<[Person[], Film[], Image[]]> } A promise that resolves to a tuple containing arrays
+   * of entities:
+   */
+  async getAllLinks(
+    dto: CreateStarshipDto | UpdateStarshipDto,
+  ): Promise<[Person[], Film[], Image[]]> {
+    return await Promise.all([
+      this.commonService.getPeople(dto.pilots),
+      this.commonService.getFilms(dto.films),
+      this.commonService.getImages(dto.images),
+    ]);
   }
 }

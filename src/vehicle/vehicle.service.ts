@@ -6,6 +6,8 @@ import { Vehicle } from './entities/vehicle.entity';
 import { Repository } from 'typeorm';
 import { CommonService } from '../common/common.service';
 import { Image } from '../image/entities/image.entity';
+import { Person } from '../person/entities/person.entity';
+import { Film } from '../film/entities/film.entity';
 
 @Injectable()
 export class VehicleService {
@@ -22,11 +24,13 @@ export class VehicleService {
    * @throws {Error} Throws an error if there is an issue with creating or saving the vehicle.
    */
   async create(dto: CreateVehicleDto): Promise<OperationResult> {
-    const id: number = (await this.vehicleRepository.count()) + 1;
+    const id: number = await this.commonService.getId(this.vehicleRepository);
     const date: Date = new Date();
 
+    const [pilots, films, images] = await this.getAllLinks(dto);
+
     const new_vehicle: Vehicle = this.vehicleRepository.create({
-      id: id,
+      id,
       name: dto.name,
       model: dto.model,
       manufacturer: dto.manufacturer,
@@ -38,9 +42,9 @@ export class VehicleService {
       cargo_capacity: dto.cargo_capacity || null,
       consumables: dto.consumables,
       vehicle_class: dto.vehicle_class,
-      pilots: await this.commonService.getPeople(dto.pilots),
-      films: await this.commonService.getFilms(dto.films),
-      images: await this.commonService.getImages(dto.images),
+      pilots,
+      films,
+      images,
       created: date,
       edited: date,
       url: this.commonService.createUrl(id, 'vehicles'),
@@ -170,11 +174,7 @@ export class VehicleService {
     const vehicle: Vehicle = await this.findOne(id, ['images']);
     const oldImages: Image[] = vehicle.images;
 
-    const [pilots, films, images] = await Promise.all([
-      this.commonService.getPeople(dto.pilots),
-      this.commonService.getFilms(dto.films),
-      this.commonService.getImages(dto.images),
-    ]);
+    const [pilots, films, images] = await this.getAllLinks(dto);
 
     Object.assign(vehicle, {
       name: dto.name ?? vehicle.name,
@@ -223,5 +223,23 @@ export class VehicleService {
     await this.vehicleRepository.remove(vehicle);
 
     return { success: true };
+  }
+
+  /**
+   * Retrieves all related entities for a vehicle.
+   *
+   * @param { CreateStarshipDto | UpdateStarshipDto } dto - The data transfer object containing the identifiers for
+   * entities to retrieve.
+   * @returns { Promise<[Person[], Film[], Image[]]> } A promise that resolves to a tuple containing arrays
+   * of entities:
+   */
+  async getAllLinks(
+    dto: CreateVehicleDto | UpdateVehicleDto,
+  ): Promise<[Person[], Film[], Image[]]> {
+    return await Promise.all([
+      this.commonService.getPeople(dto.pilots),
+      this.commonService.getFilms(dto.films),
+      this.commonService.getImages(dto.images),
+    ]);
   }
 }

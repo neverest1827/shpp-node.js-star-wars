@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsOrder, Repository } from 'typeorm';
 import { Person } from '../person/entities/person.entity';
 import { Planet } from '../planet/entities/planet.entity';
 import { Film } from '../film/entities/film.entity';
@@ -43,7 +43,7 @@ export class CommonService {
     if (!ids.length) return [];
 
     return await Promise.all(
-      ids.map(async (id: number) => {
+      ids.map(async (id: number): Promise<EntityType | null> => {
         return repository.findOne({ where: { id } });
       }),
     );
@@ -118,5 +118,24 @@ export class CommonService {
         await this.imageService.remove(image.filename);
       }
     }
+  }
+
+  /**
+   * Retrieves the ID of the last record in the specified repository and returns the next available ID.
+   * If the repository is empty, returns 1.
+   *
+   * @template T - The entity type, which must have an `id` property of type number.
+   * @param {Repository<T>} repository - The TypeORM repository to search for the record.
+   * @returns {Promise<number>} - The next ID that can be used for a new record.
+   */
+  async getId<T extends { id: number }>(
+    repository: Repository<T>,
+  ): Promise<number> {
+    const lastEntity: T[] = await repository.find({
+      order: { id: 'DESC' } as FindOptionsOrder<T>,
+      take: 1,
+    });
+
+    return lastEntity.length > 0 ? ++lastEntity[0].id : 1;
   }
 }

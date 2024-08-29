@@ -6,6 +6,8 @@ import { Planet } from './entities/planet.entity';
 import { Repository } from 'typeorm';
 import { CommonService } from '../common/common.service';
 import { Image } from '../image/entities/image.entity';
+import { Person } from '../person/entities/person.entity';
+import { Film } from '../film/entities/film.entity';
 
 @Injectable()
 export class PlanetService {
@@ -23,10 +25,13 @@ export class PlanetService {
    * @throws {Error} Throws an error if there is an issue with creating or saving the planet.
    */
   async create(dto: CreatePlanetDto): Promise<OperationResult> {
-    const id: number = (await this.planetRepository.count()) + 1;
+    const id: number = await this.commonService.getId(this.planetRepository);
     const date: Date = new Date();
+
+    const [residents, films, images] = await this.getAllLinks(dto);
+
     const new_planet: Planet = this.planetRepository.create({
-      id: id,
+      id,
       name: dto.name,
       rotation_period: dto.rotation_period || null,
       orbital_period: dto.orbital_period || null,
@@ -36,9 +41,9 @@ export class PlanetService {
       terrain: dto.terrain,
       surface_water: dto.surface_water || null,
       population: dto.population || null,
-      residents: await this.commonService.getPeople(dto.residents),
-      films: await this.commonService.getFilms(dto.films),
-      images: await this.commonService.getImages(dto.images),
+      residents,
+      films,
+      images,
       created: date,
       edited: date,
       url: this.commonService.createUrl(id, 'planets'),
@@ -165,11 +170,7 @@ export class PlanetService {
     const planet: Planet = await this.findOne(id, ['images']);
     const oldImages: Image[] = planet.images;
 
-    const [residents, films, images] = await Promise.all([
-      this.commonService.getPeople(dto.residents),
-      this.commonService.getFilms(dto.films),
-      this.commonService.getImages(dto.images),
-    ]);
+    const [residents, films, images] = await this.getAllLinks(dto);
 
     Object.assign(planet, {
       name: dto.name ?? planet.name,
@@ -215,5 +216,22 @@ export class PlanetService {
     await this.planetRepository.remove(planet);
 
     return { success: true };
+  }
+
+  /**
+   * Retrieves all related entities for a planet.
+   *
+   * @param { CreatePlanetDto | UpdatePlanetDto } dto - The data transfer object containing the identifiers for
+   * entities to retrieve.
+   * @returns { Promise<[Person[], Film[], Image[]]> } A promise that resolves to a tuple containing arrays of entities:
+   */
+  async getAllLinks(
+    dto: CreatePlanetDto | UpdatePlanetDto,
+  ): Promise<[Person[], Film[], Image[]]> {
+    return await Promise.all([
+      this.commonService.getPeople(dto.residents),
+      this.commonService.getFilms(dto.films),
+      this.commonService.getImages(dto.images),
+    ]);
   }
 }

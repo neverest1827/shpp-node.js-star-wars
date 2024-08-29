@@ -6,6 +6,11 @@ import { Film } from './entities/film.entity';
 import { Repository } from 'typeorm';
 import { CommonService } from '../common/common.service';
 import { Image } from '../image/entities/image.entity';
+import { Person } from '../person/entities/person.entity';
+import { Planet } from '../planet/entities/planet.entity';
+import { Specie } from '../specie/entities/specie.entity';
+import { Vehicle } from '../vehicle/entities/vehicle.entity';
+import { Starship } from '../starship/entities/starship.entity';
 
 @Injectable()
 export class FilmService {
@@ -23,23 +28,26 @@ export class FilmService {
    * @throws {Error} Throws an error if there is an issue with creating or saving the film.
    */
   async create(dto: CreateFilmDto): Promise<OperationResult> {
-    const id: number = (await this.filmRepository.count()) + 1;
+    const id: number = await this.commonService.getId(this.filmRepository);
     const date: Date = new Date();
 
+    const [characters, planets, starships, vehicles, species, images] =
+      await this.getAllLinks(dto);
+
     const new_film: Film = this.filmRepository.create({
-      id: id,
+      id,
       title: dto.title,
       episode_id: dto.episode_id || null,
       opening_crawl: dto.opening_crawl,
       director: dto.director,
       producer: dto.producer,
       release_date: dto.release_date,
-      characters: await this.commonService.getPeople(dto.characters),
-      planets: await this.commonService.getPlanets(dto.planets),
-      starships: await this.commonService.getStarships(dto.starships),
-      vehicles: await this.commonService.getVehicles(dto.vehicles),
-      species: await this.commonService.getSpecies(dto.species),
-      images: await this.commonService.getImages(dto.images),
+      characters,
+      planets,
+      starships,
+      vehicles,
+      species,
+      images,
       created: date,
       edited: date,
       url: this.commonService.createUrl(id, 'films'),
@@ -175,14 +183,7 @@ export class FilmService {
     const oldImages: Image[] = film.images;
 
     const [characters, planets, species, vehicles, starships, images] =
-      await Promise.all([
-        this.commonService.getPeople(dto.characters),
-        this.commonService.getPlanets(dto.planets),
-        this.commonService.getSpecies(dto.species),
-        this.commonService.getVehicles(dto.vehicles),
-        this.commonService.getStarships(dto.starships),
-        this.commonService.getImages(dto.images),
-      ]);
+      await this.getAllLinks(dto);
 
     Object.assign(film, {
       title: dto.title ?? film.title,
@@ -228,5 +229,26 @@ export class FilmService {
     await this.filmRepository.remove(film);
 
     return { success: true };
+  }
+
+  /**
+   * Retrieves all related entities for a film.
+   *
+   * @param {CreateFilmDto | UpdateFilmDto} dto - The data transfer object containing the identifiers for entities
+   * to retrieve.
+   * @returns {Promise<[Person[], Planet[], Specie[], Vehicle[], Starship[], Image[]]>} A promise that resolves to a
+   * tuple containing arrays of entities:
+   */
+  async getAllLinks(
+    dto: CreateFilmDto | UpdateFilmDto,
+  ): Promise<[Person[], Planet[], Specie[], Vehicle[], Starship[], Image[]]> {
+    return await Promise.all([
+      this.commonService.getPeople(dto.characters),
+      this.commonService.getPlanets(dto.planets),
+      this.commonService.getSpecies(dto.species),
+      this.commonService.getVehicles(dto.vehicles),
+      this.commonService.getStarships(dto.starships),
+      this.commonService.getImages(dto.images),
+    ]);
   }
 }

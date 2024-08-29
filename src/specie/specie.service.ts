@@ -6,6 +6,9 @@ import { Repository } from 'typeorm';
 import { Specie } from './entities/specie.entity';
 import { CommonService } from '../common/common.service';
 import { Image } from '../image/entities/image.entity';
+import { Planet } from '../planet/entities/planet.entity';
+import { Person } from '../person/entities/person.entity';
+import { Film } from '../film/entities/film.entity';
 
 @Injectable()
 export class SpecieService {
@@ -23,10 +26,13 @@ export class SpecieService {
    * @throws {Error} Throws an error if there is an issue with creating or saving the specie.
    */
   async create(dto: CreateSpecieDto): Promise<OperationResult> {
-    const id: number = (await this.specieRepository.count()) + 1;
+    const id: number = await this.commonService.getId(this.specieRepository);
     const date: Date = new Date();
+
+    const [homeworld, people, films, images] = await this.getAllLinks(dto);
+
     const new_specie: Specie = this.specieRepository.create({
-      id: id,
+      id,
       name: dto.name,
       classification: dto.classification,
       designation: dto.designation,
@@ -36,10 +42,10 @@ export class SpecieService {
       eye_colors: dto.eye_colors,
       average_lifespan: dto.average_lifespan || null,
       language: dto.language,
-      homeworld: await this.commonService.getPlanets(dto.homeworld),
-      people: await this.commonService.getPeople(dto.people),
-      films: await this.commonService.getFilms(dto.films),
-      images: await this.commonService.getImages(dto.images),
+      homeworld,
+      people,
+      films,
+      images,
       created: date,
       edited: date,
       url: this.commonService.createUrl(id, 'species'),
@@ -170,12 +176,7 @@ export class SpecieService {
     const specie: Specie = await this.findOne(id, ['images']);
     const oldImages: Image[] = specie.images;
 
-    const [homeworld, people, films, images] = await Promise.all([
-      this.commonService.getPlanets(dto.homeworld),
-      this.commonService.getPeople(dto.people),
-      this.commonService.getFilms(dto.films),
-      this.commonService.getImages(dto.images),
-    ]);
+    const [homeworld, people, films, images] = await this.getAllLinks(dto);
 
     Object.assign(specie, {
       name: dto.name ?? specie.name,
@@ -222,5 +223,24 @@ export class SpecieService {
     await this.specieRepository.remove(specie);
 
     return { success: true };
+  }
+
+  /**
+   * Retrieves all related entities for a specie.
+   *
+   * @param { CreateSpecieDto | UpdateSpecieDto } dto - The data transfer object containing the identifiers for
+   * entities to retrieve.
+   * @returns { Promise<[Planet[], Person[], Film[], Image[]]> } A promise that resolves to a tuple containing arrays
+   * of entities:
+   */
+  async getAllLinks(
+    dto: CreateSpecieDto | UpdateSpecieDto,
+  ): Promise<[Planet[], Person[], Film[], Image[]]> {
+    return await Promise.all([
+      this.commonService.getPlanets(dto.homeworld),
+      this.commonService.getPeople(dto.people),
+      this.commonService.getFilms(dto.films),
+      this.commonService.getImages(dto.images),
+    ]);
   }
 }
