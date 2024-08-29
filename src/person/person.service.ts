@@ -56,7 +56,6 @@ export class PersonService {
     });
 
     await this.personRepository.save(new_people);
-    console.log((await this.personRepository.count()) + 1);
     return { success: true };
   }
 
