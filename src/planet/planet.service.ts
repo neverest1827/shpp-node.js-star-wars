@@ -8,6 +8,14 @@ import { CommonService } from '../common/common.service';
 import { Image } from '../image/entities/image.entity';
 import { Person } from '../person/entities/person.entity';
 import { Film } from '../film/entities/film.entity';
+import {
+  IPaginationLinks,
+  IPaginationMeta,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
+import { Specie } from '../specie/entities/specie.entity';
+import { Vehicle } from '../vehicle/entities/vehicle.entity';
+import { Starship } from '../starship/entities/starship.entity';
 
 @Injectable()
 export class PlanetService {
@@ -103,6 +111,53 @@ export class PlanetService {
       residents: 'people',
       films: 'films',
     };
+  }
+
+  /**
+   * Retrieves a paginated list of planets from the database.
+   *
+   * @param {number} page - The current page number for pagination.
+   * @param {number} limit - The maximum number of planets to return per page.
+   * @returns {Promise<Pagination<Vehicle>>} A promise that resolves to a `Pagination` object containing the planets,
+   * pagination metadata, and links.
+   */
+  async findAll(page: number, limit: number): Promise<Pagination<Planet>> {
+    const [planets, total] = await this.planetRepository
+      .createQueryBuilder('planet')
+      .orderBy('planet.id', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    for (const planet of planets) {
+      const [residents, films] = await Promise.all([
+        this.commonService.getRelationIds<Person>(
+          'person',
+          'homeworld',
+          planet.id,
+        ),
+        this.commonService.getRelationIds<Film>('film', 'planets', planet.id),
+      ]);
+
+      planet.residents = residents;
+      planet.films = films;
+    }
+
+    const meta: IPaginationMeta = this.commonService.getPaginationMeta(
+      total,
+      planets.length,
+      limit,
+      page,
+    );
+
+    const links: IPaginationLinks = this.commonService.getPaginationLinks(
+      'planets',
+      page,
+      limit,
+      total,
+    );
+
+    return new Pagination<Planet>(planets, meta, links);
   }
 
   /**
@@ -229,8 +284,8 @@ export class PlanetService {
     dto: CreatePlanetDto | UpdatePlanetDto,
   ): Promise<[Person[], Film[], Image[]]> {
     return await Promise.all([
-      this.commonService.getPeople(dto.residents),
-      this.commonService.getFilms(dto.films),
+      this.commonService.getEntitiesByIds<Person>(dto.residents, 'person'),
+      this.commonService.getEntitiesByIds<Film>(dto.films, 'film'),
       this.commonService.getImages(dto.images),
     ]);
   }

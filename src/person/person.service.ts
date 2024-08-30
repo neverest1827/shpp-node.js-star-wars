@@ -11,6 +11,11 @@ import { Film } from '../film/entities/film.entity';
 import { Specie } from '../specie/entities/specie.entity';
 import { Vehicle } from '../vehicle/entities/vehicle.entity';
 import { Starship } from '../starship/entities/starship.entity';
+import {
+  IPaginationLinks,
+  IPaginationMeta,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class PersonService {
@@ -111,6 +116,76 @@ export class PersonService {
       vehicles: 'vehicles',
       starships: 'starships',
     };
+  }
+
+  /**
+   * Retrieves a paginated list of people from the database.
+   *
+   * @param {number} page - The current page number for pagination.
+   * @param {number} limit - The maximum number of people to return per page.
+   * @returns {Promise<Pagination<Vehicle>>} A promise that resolves to a `Pagination` object containing the people,
+   * pagination metadata, and links.
+   */
+  async findAll(page: number, limit: number): Promise<Pagination<Person>> {
+    const [people, total] = await this.personRepository
+      .createQueryBuilder('person')
+      .orderBy('person.id', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    for (const person of people) {
+      const [homeworld, films, species, vehicles, starships] =
+        await Promise.all([
+          this.commonService.getRelationIds<Planet>(
+            'planet',
+            'residents',
+            person.id,
+          ),
+          this.commonService.getRelationIds<Film>(
+            'film',
+            'characters',
+            person.id,
+          ),
+          this.commonService.getRelationIds<Specie>(
+            'specie',
+            'people',
+            person.id,
+          ),
+          this.commonService.getRelationIds<Vehicle>(
+            'vehicle',
+            'pilots',
+            person.id,
+          ),
+          this.commonService.getRelationIds<Starship>(
+            'starship',
+            'pilots',
+            person.id,
+          ),
+        ]);
+
+      person.homeworld = homeworld;
+      person.films = films;
+      person.species = species;
+      person.vehicles = vehicles;
+      person.starships = starships;
+    }
+
+    const meta: IPaginationMeta = this.commonService.getPaginationMeta(
+      total,
+      people.length,
+      limit,
+      page,
+    );
+
+    const links: IPaginationLinks = this.commonService.getPaginationLinks(
+      'people',
+      page,
+      limit,
+      total,
+    );
+
+    return new Pagination<Person>(people, meta, links);
   }
 
   /**
@@ -251,11 +326,11 @@ export class PersonService {
     dto: CreatePersonDto | UpdatePersonDto,
   ): Promise<[Planet[], Film[], Specie[], Vehicle[], Starship[], Image[]]> {
     return await Promise.all([
-      this.commonService.getPlanets(dto.homeworld),
-      this.commonService.getFilms(dto.films),
-      this.commonService.getSpecies(dto.species),
-      this.commonService.getVehicles(dto.vehicles),
-      this.commonService.getStarships(dto.starships),
+      this.commonService.getEntitiesByIds<Planet>(dto.homeworld, 'planet'),
+      this.commonService.getEntitiesByIds<Film>(dto.films, 'film'),
+      this.commonService.getEntitiesByIds<Specie>(dto.species, 'specie'),
+      this.commonService.getEntitiesByIds<Vehicle>(dto.vehicles, 'vehicle'),
+      this.commonService.getEntitiesByIds<Starship>(dto.starships, 'starship'),
       this.commonService.getImages(dto.images),
     ]);
   }

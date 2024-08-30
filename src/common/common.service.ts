@@ -10,6 +10,7 @@ import { Starship } from '../starship/entities/starship.entity';
 import { Image } from '../image/entities/image.entity';
 import { ConfigService } from '@nestjs/config';
 import { ImageService } from '../image/image.service';
+import { IPaginationLinks, IPaginationMeta } from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class CommonService {
@@ -36,53 +37,16 @@ export class CommonService {
     return `http://localhost:${port}/${entity}/${id}`;
   }
 
-  async getEntitiesByIds(
-    ids: number[],
-    repository: Repository<EntityType>,
-  ): Promise<EntityType[]> {
+  async getEntitiesByIds<T>(ids: number[], entity: string): Promise<T[]> {
     if (!ids.length) return [];
+    const repository: Repository<EntityType> =
+      this.getRepositoryByEntityName(entity);
 
     return await Promise.all(
       ids.map(async (id: number): Promise<EntityType | null> => {
         return repository.findOne({ where: { id } });
       }),
     );
-  }
-
-  async getPeople(peopleIds: number[]): Promise<Person[]> {
-    return (await this.getEntitiesByIds(
-      peopleIds,
-      this.personRepository,
-    )) as Person[];
-  }
-
-  async getPlanets(ids: number[]): Promise<Planet[]> {
-    return this.getEntitiesByIds(ids, this.planetRepository);
-  }
-
-  async getFilms(ids: number[]): Promise<Film[]> {
-    return (await this.getEntitiesByIds(ids, this.filmRepository)) as Film[];
-  }
-
-  async getSpecies(ids: number[]): Promise<Specie[]> {
-    return (await this.getEntitiesByIds(
-      ids,
-      this.specieRepository,
-    )) as Specie[];
-  }
-
-  async getVehicles(ids: number[]): Promise<Vehicle[]> {
-    return (await this.getEntitiesByIds(
-      ids,
-      this.vehicleRepository,
-    )) as Vehicle[];
-  }
-
-  async getStarships(ids: number[]): Promise<Starship[]> {
-    return (await this.getEntitiesByIds(
-      ids,
-      this.starshipRepository,
-    )) as Starship[];
   }
 
   async getImages(imageNames: string[]): Promise<Image[]> {
@@ -137,5 +101,109 @@ export class CommonService {
     });
 
     return lastEntity.length > 0 ? ++lastEntity[0].id : 1;
+  }
+
+  /**
+   * Generates pagination links for navigating through paginated results.
+   *
+   * @param {string} entity - The entity name to be included in the URL path.
+   * @param {number} page - The current page number.
+   * @param {number} limit - The number of items per page.
+   * @param {number} total - The total number of items.
+   * @returns {IPaginationLinks} An object containing the URLs for the first, previous, next, and last pages.
+   */
+  getPaginationLinks(
+    entity: string,
+    page: number,
+    limit: number,
+    total: number,
+  ): IPaginationLinks {
+    return {
+      first: `api/v1/${entity}?page=1&limit=${limit}`,
+      previous:
+        page > 1 ? `api/v1/people?page=${page - 1}&limit=${limit}` : null,
+      next:
+        page < Math.ceil(total / limit)
+          ? `api/v1/people?page=${page + 1}&limit=${limit}`
+          : null,
+      last: `api/v1/people?page=${Math.ceil(total / limit)}&limit=${limit}`,
+    };
+  }
+
+  /**
+   * Generates pagination metadata for a paginated response.
+   *
+   * @param {number} total - The total number of items across all pages.
+   * @param {number} count - The number of items on the current page.
+   * @param {number} limit - The number of items per page.
+   * @param {number} page - The current page number.
+   * @returns {IPaginationMeta} An object containing pagination metadata such as total items, item count, items per
+   * page, total pages, and the current page.
+   */
+  getPaginationMeta(
+    total: number,
+    count: number,
+    limit: number,
+    page: number,
+  ): IPaginationMeta {
+    return {
+      totalItems: total,
+      itemCount: count,
+      itemsPerPage: limit,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
+  }
+
+  /**
+   * Retrieves ids of related entities for a specific entity and its relation.
+   *
+   * @template T - The type of the entities being retrieved.
+   * @param {string} entity - The name of the entity for which relations are being fetched (e.g., 'person', 'planet', 'starship').
+   * @param {string} relation - The name of the relation that links to the entity (e.g., 'films' if fetching related films).
+   * @param {number} id - The ID of the entity for which related entities are being fetched.
+   * @returns {Promise<T[]>} A promise that resolves to an array of related entities, each containing only the id field.
+   */
+  async getRelationIds<T>(
+    entity: string,
+    relation: string,
+    id: number,
+  ): Promise<T[]> {
+    const repository: Repository<EntityType> =
+      this.getRepositoryByEntityName(entity);
+
+    const alias: string = `${entity}_relation`;
+
+    return await repository
+      .createQueryBuilder(entity)
+      .innerJoin(`${entity}.${relation}`, alias, `${alias}.id = :id`, { id })
+      .select([`${entity}.id`])
+      .getMany();
+  }
+
+  /**
+   * Returns the TypeORM repository for a given entity name.
+   *
+   * @param {string} entity - The name of the entity for which to retrieve the repository.
+   * @returns {Repository<any>} The repository corresponding to the given entity name.
+   * @throws {Error} If the entity name is unknown or not supported.
+   */
+  private getRepositoryByEntityName(entity: string): Repository<any> {
+    switch (entity) {
+      case 'person':
+        return this.personRepository;
+      case 'planet':
+        return this.planetRepository;
+      case 'film':
+        return this.filmRepository;
+      case 'starship':
+        return this.starshipRepository;
+      case 'vehicle':
+        return this.vehicleRepository;
+      case 'specie':
+        return this.specieRepository;
+      default:
+        throw new Error(`Unknown entity: ${entity}`);
+    }
   }
 }

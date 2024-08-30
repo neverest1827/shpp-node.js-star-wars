@@ -6,8 +6,8 @@ import {
   Param,
   ParseIntPipe,
   Patch,
-  Post,
-} from '@nestjs/common';
+  Post, Query
+} from "@nestjs/common";
 import { PlanetService } from './planet.service';
 import { CreatePlanetDto } from './dto/create-planet.dto';
 import { UpdatePlanetDto } from './dto/update-planet.dto';
@@ -16,6 +16,8 @@ import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
 import { Planet } from './entities/planet.entity';
+import { Pagination } from "nestjs-typeorm-paginate";
+import { Person } from "../person/entities/person.entity";
 
 @Controller('api/v1/planets')
 @ApiTags('Planet')
@@ -27,6 +29,15 @@ export class PlanetController {
   @ApiBearerAuth('access-token')
   create(@Body() dto: CreatePlanetDto): Promise<OperationResult> {
     return this.planetService.create(dto);
+  }
+
+  @Get()
+  @Public()
+  findAll(
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Planet>> {
+    return this.planetService.findAll(page, limit);
   }
 
   @Get('names')

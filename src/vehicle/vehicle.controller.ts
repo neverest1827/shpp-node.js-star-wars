@@ -6,8 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
-} from '@nestjs/common';
+  ParseIntPipe, Query
+} from "@nestjs/common";
 import { VehicleService } from './vehicle.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
@@ -16,6 +16,8 @@ import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
 import { Vehicle } from './entities/vehicle.entity';
+import { Pagination } from "nestjs-typeorm-paginate";
+import { Person } from "../person/entities/person.entity";
 
 @Controller('api/v1/vehicles')
 @ApiTags('Vehicle')
@@ -27,6 +29,15 @@ export class VehicleController {
   @ApiBearerAuth('access-token')
   create(@Body() dto: CreateVehicleDto): Promise<OperationResult> {
     return this.vehicleService.create(dto);
+  }
+
+  @Get()
+  @Public()
+  findAll(
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Vehicle>> {
+    return this.vehicleService.findAll(page, limit);
   }
 
   @Get('names')

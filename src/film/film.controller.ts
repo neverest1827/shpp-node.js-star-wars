@@ -6,8 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
-} from '@nestjs/common';
+  ParseIntPipe, Query
+} from "@nestjs/common";
 import { FilmService } from './film.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../role/role.decorator';
@@ -16,6 +16,8 @@ import { Public } from '../common/decorators/public.decorator';
 import { Film } from './entities/film.entity';
 import { CreateFilmDto } from './dto/create-film.dto';
 import { UpdateFilmDto } from './dto/update-film.dto';
+import { Pagination } from "nestjs-typeorm-paginate";
+import { Person } from "../person/entities/person.entity";
 
 @Controller('api/v1/films')
 @ApiTags('Film')
@@ -27,6 +29,15 @@ export class FilmController {
   @ApiBearerAuth('access-token')
   create(@Body() dto: CreateFilmDto): Promise<OperationResult> {
     return this.filmService.create(dto);
+  }
+
+  @Get()
+  @Public()
+  findAll(
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Film>> {
+    return this.filmService.findAll(page, limit);
   }
 
   @Get('names')

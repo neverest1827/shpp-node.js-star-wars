@@ -8,6 +8,12 @@ import { Starship } from './entities/starship.entity';
 import { Image } from '../image/entities/image.entity';
 import { Person } from '../person/entities/person.entity';
 import { Film } from '../film/entities/film.entity';
+import {
+  IPaginationLinks,
+  IPaginationMeta,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
+import { Planet } from "../planet/entities/planet.entity";
 
 @Injectable()
 export class StarshipService {
@@ -110,6 +116,57 @@ export class StarshipService {
       pilots: 'people',
       films: 'films',
     };
+  }
+
+  /**
+   * Retrieves a paginated list of starships from the database.
+   *
+   * @param {number} page - The current page number for pagination.
+   * @param {number} limit - The maximum number of starships to return per page.
+   * @returns {Promise<Pagination<Vehicle>>} A promise that resolves to a `Pagination` object containing the starships,
+   * pagination metadata, and links.
+   */
+  async findAll(page: number, limit: number): Promise<Pagination<Starship>> {
+    const [starships, total] = await this.starshipRepository
+      .createQueryBuilder('starship')
+      .orderBy('starship.id', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    for (const starship of starships) {
+      const [pilots, films] = await Promise.all([
+        this.commonService.getRelationIds<Person>(
+          'person',
+          'starships',
+          starship.id,
+        ),
+        this.commonService.getRelationIds<Film>(
+          'film',
+          'starships',
+          starship.id,
+        ),
+      ]);
+
+      starship.pilots = pilots;
+      starship.films = films;
+    }
+
+    const meta: IPaginationMeta = this.commonService.getPaginationMeta(
+      total,
+      starships.length,
+      limit,
+      page,
+    );
+
+    const links: IPaginationLinks = this.commonService.getPaginationLinks(
+      'starships',
+      page,
+      limit,
+      total,
+    );
+
+    return new Pagination<Starship>(starships, meta, links);
   }
 
   /**
@@ -245,8 +302,8 @@ export class StarshipService {
     dto: CreateStarshipDto | UpdateStarshipDto,
   ): Promise<[Person[], Film[], Image[]]> {
     return await Promise.all([
-      this.commonService.getPeople(dto.pilots),
-      this.commonService.getFilms(dto.films),
+      this.commonService.getEntitiesByIds<Person>(dto.pilots, 'person'),
+      this.commonService.getEntitiesByIds<Film>(dto.films, 'film'),
       this.commonService.getImages(dto.images),
     ]);
   }

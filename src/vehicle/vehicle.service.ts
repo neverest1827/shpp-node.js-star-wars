@@ -8,6 +8,11 @@ import { CommonService } from '../common/common.service';
 import { Image } from '../image/entities/image.entity';
 import { Person } from '../person/entities/person.entity';
 import { Film } from '../film/entities/film.entity';
+import {
+  IPaginationLinks,
+  IPaginationMeta,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class VehicleService {
@@ -106,6 +111,53 @@ export class VehicleService {
       pilots: 'people',
       films: 'films',
     };
+  }
+
+  /**
+   * Retrieves a paginated list of vehicles from the database.
+   *
+   * @param {number} page - The current page number for pagination.
+   * @param {number} limit - The maximum number of vehicles to return per page.
+   * @returns {Promise<Pagination<Vehicle>>} A promise that resolves to a `Pagination` object containing the vehicles,
+   * pagination metadata, and links.
+   */
+  async findAll(page: number, limit: number): Promise<Pagination<Vehicle>> {
+    const [vehicles, total] = await this.vehicleRepository
+      .createQueryBuilder('vehicle')
+      .orderBy('vehicle.id', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    for (const vehicle of vehicles) {
+      const [pilots, films] = await Promise.all([
+        this.commonService.getRelationIds<Person>(
+          'person',
+          'vehicles',
+          vehicle.id,
+        ),
+        this.commonService.getRelationIds<Film>('film', 'vehicles', vehicle.id),
+      ]);
+
+      vehicle.pilots = pilots;
+      vehicle.films = films;
+    }
+
+    const meta: IPaginationMeta = this.commonService.getPaginationMeta(
+      total,
+      vehicles.length,
+      limit,
+      page,
+    );
+
+    const links: IPaginationLinks = this.commonService.getPaginationLinks(
+      'vehicles',
+      page,
+      limit,
+      total,
+    );
+
+    return new Pagination<Vehicle>(vehicles, meta, links);
   }
 
   /**
@@ -237,8 +289,8 @@ export class VehicleService {
     dto: CreateVehicleDto | UpdateVehicleDto,
   ): Promise<[Person[], Film[], Image[]]> {
     return await Promise.all([
-      this.commonService.getPeople(dto.pilots),
-      this.commonService.getFilms(dto.films),
+      this.commonService.getEntitiesByIds<Person>(dto.pilots, 'person'),
+      this.commonService.getEntitiesByIds<Film>(dto.films, 'film'),
       this.commonService.getImages(dto.images),
     ]);
   }

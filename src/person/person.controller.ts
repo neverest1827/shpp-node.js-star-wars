@@ -6,8 +6,8 @@ import {
   Param,
   ParseIntPipe,
   Patch,
-  Post,
-} from '@nestjs/common';
+  Post, Query
+} from "@nestjs/common";
 import { PersonService } from './person.service';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
@@ -16,6 +16,7 @@ import { UserRole } from '../role/role.enum';
 import { Roles } from '../role/role.decorator';
 import { Public } from '../common/decorators/public.decorator';
 import { Person } from './entities/person.entity';
+import { Pagination } from 'nestjs-typeorm-paginate';
 
 @Controller('api/v1/people')
 @ApiTags('People')
@@ -27,6 +28,15 @@ export class PersonController {
   @ApiBearerAuth('access-token')
   create(@Body() dto: CreatePersonDto): Promise<OperationResult> {
     return this.personService.create(dto);
+  }
+
+  @Get()
+  @Public()
+  findAll(
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Person>> {
+    return this.personService.findAll(page, limit);
   }
 
   @Get('names')

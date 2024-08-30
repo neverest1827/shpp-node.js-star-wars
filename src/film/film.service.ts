@@ -11,6 +11,11 @@ import { Planet } from '../planet/entities/planet.entity';
 import { Specie } from '../specie/entities/specie.entity';
 import { Vehicle } from '../vehicle/entities/vehicle.entity';
 import { Starship } from '../starship/entities/starship.entity';
+import {
+  IPaginationLinks,
+  IPaginationMeta,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 
 @Injectable()
 export class FilmService {
@@ -110,6 +115,64 @@ export class FilmService {
   }
 
   /**
+   * Retrieves a paginated list of films from the database.
+   *
+   * @param {number} page - The current page number for pagination.
+   * @param {number} limit - The maximum number of films to return per page.
+   * @returns {Promise<Pagination<Vehicle>>} A promise that resolves to a `Pagination` object containing the films,
+   * pagination metadata, and links.
+   */
+  async findAll(page: number, limit: number): Promise<Pagination<Film>> {
+    const [films, total] = await this.filmRepository
+      .createQueryBuilder('film')
+      .orderBy('film.id', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    for (const film of films) {
+      const [characters, planets, starships, vehicles, species] =
+        await Promise.all([
+          this.commonService.getRelationIds<Person>('person', 'films', film.id),
+          this.commonService.getRelationIds<Planet>('planet', 'films', film.id),
+          this.commonService.getRelationIds<Starship>(
+            'starship',
+            'films',
+            film.id,
+          ),
+          this.commonService.getRelationIds<Vehicle>(
+            'vehicle',
+            'films',
+            film.id,
+          ),
+          this.commonService.getRelationIds<Specie>('specie', 'films', film.id),
+        ]);
+
+      film.characters = characters;
+      film.planets = planets;
+      film.starships = starships;
+      film.vehicles = vehicles;
+      film.species = species;
+    }
+
+    const meta: IPaginationMeta = this.commonService.getPaginationMeta(
+      total,
+      films.length,
+      limit,
+      page,
+    );
+
+    const links: IPaginationLinks = this.commonService.getPaginationLinks(
+      'films',
+      page,
+      limit,
+      total,
+    );
+
+    return new Pagination<Film>(films, meta, links);
+  }
+
+  /**
    * Finds a film by its ID, including related entities.
    *
    * @param {number} id - The ID of the film to find.
@@ -137,7 +200,7 @@ export class FilmService {
       .leftJoin('film.characters', 'person')
       .leftJoin('film.planets', 'planet')
       .leftJoin('film.starships', 'starship')
-      .leftJoinAndSelect('film.vehicles', 'vehicle')
+      .leftJoin('film.vehicles', 'vehicle')
       .leftJoin('film.species', 'specie')
       .leftJoin('film.images', 'image')
       .select([
@@ -243,11 +306,11 @@ export class FilmService {
     dto: CreateFilmDto | UpdateFilmDto,
   ): Promise<[Person[], Planet[], Specie[], Vehicle[], Starship[], Image[]]> {
     return await Promise.all([
-      this.commonService.getPeople(dto.characters),
-      this.commonService.getPlanets(dto.planets),
-      this.commonService.getSpecies(dto.species),
-      this.commonService.getVehicles(dto.vehicles),
-      this.commonService.getStarships(dto.starships),
+      this.commonService.getEntitiesByIds<Person>(dto.characters, 'person'),
+      this.commonService.getEntitiesByIds<Planet>(dto.planets, 'planet'),
+      this.commonService.getEntitiesByIds<Specie>(dto.species, 'specie'),
+      this.commonService.getEntitiesByIds<Vehicle>(dto.vehicles, 'vehicle'),
+      this.commonService.getEntitiesByIds<Starship>(dto.starships, 'starship'),
       this.commonService.getImages(dto.images),
     ]);
   }

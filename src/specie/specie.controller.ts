@@ -6,8 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
-} from '@nestjs/common';
+  ParseIntPipe, Query
+} from "@nestjs/common";
 import { SpecieService } from './specie.service';
 import { CreateSpecieDto } from './dto/create-specie.dto';
 import { UpdateSpecieDto } from './dto/update-specie.dto';
@@ -16,6 +16,8 @@ import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
 import { Specie } from './entities/specie.entity';
+import { Pagination } from "nestjs-typeorm-paginate";
+import { Person } from "../person/entities/person.entity";
 
 @Controller('api/v1/species')
 @ApiTags('Specie')
@@ -27,6 +29,15 @@ export class SpecieController {
   @ApiBearerAuth('access-token')
   create(@Body() dto: CreateSpecieDto): Promise<OperationResult> {
     return this.specieService.create(dto);
+  }
+
+  @Get()
+  @Public()
+  findAll(
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+  ): Promise<Pagination<Specie>> {
+    return this.specieService.findAll(page, limit);
   }
 
   @Get('names')
