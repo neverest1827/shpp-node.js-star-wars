@@ -6,8 +6,9 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe, Query
-} from "@nestjs/common";
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { FilmService } from './film.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../role/role.decorator';
@@ -16,8 +17,7 @@ import { Public } from '../common/decorators/public.decorator';
 import { Film } from './entities/film.entity';
 import { CreateFilmDto } from './dto/create-film.dto';
 import { UpdateFilmDto } from './dto/update-film.dto';
-import { Pagination } from "nestjs-typeorm-paginate";
-import { Person } from "../person/entities/person.entity";
+import { Pagination } from 'nestjs-typeorm-paginate';
 
 @Controller('api/v1/films')
 @ApiTags('Film')

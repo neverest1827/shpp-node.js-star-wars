@@ -13,7 +13,6 @@ import {
   IPaginationMeta,
   Pagination,
 } from 'nestjs-typeorm-paginate';
-import { Planet } from "../planet/entities/planet.entity";
 
 @Injectable()
 export class StarshipService {

@@ -6,8 +6,9 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe, Query
-} from "@nestjs/common";
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { SpecieService } from './specie.service';
 import { CreateSpecieDto } from './dto/create-specie.dto';
 import { UpdateSpecieDto } from './dto/update-specie.dto';
@@ -16,8 +17,7 @@ import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
 import { Specie } from './entities/specie.entity';
-import { Pagination } from "nestjs-typeorm-paginate";
-import { Person } from "../person/entities/person.entity";
+import { Pagination } from 'nestjs-typeorm-paginate';
 
 @Controller('api/v1/species')
 @ApiTags('Specie')

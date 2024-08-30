@@ -6,8 +6,9 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe, Query
-} from "@nestjs/common";
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { VehicleService } from './vehicle.service';
 import { CreateVehicleDto } from './dto/create-vehicle.dto';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto';
@@ -16,8 +17,7 @@ import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
 import { Vehicle } from './entities/vehicle.entity';
-import { Pagination } from "nestjs-typeorm-paginate";
-import { Person } from "../person/entities/person.entity";
+import { Pagination } from 'nestjs-typeorm-paginate';
 
 @Controller('api/v1/vehicles')
 @ApiTags('Vehicle')

@@ -6,8 +6,9 @@ import {
   Param,
   ParseIntPipe,
   Patch,
-  Post, Query
-} from "@nestjs/common";
+  Post,
+  Query,
+} from '@nestjs/common';
 import { PlanetService } from './planet.service';
 import { CreatePlanetDto } from './dto/create-planet.dto';
 import { UpdatePlanetDto } from './dto/update-planet.dto';
@@ -16,8 +17,7 @@ import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
 import { Planet } from './entities/planet.entity';
-import { Pagination } from "nestjs-typeorm-paginate";
-import { Person } from "../person/entities/person.entity";
+import { Pagination } from 'nestjs-typeorm-paginate';
 
 @Controller('api/v1/planets')
 @ApiTags('Planet')

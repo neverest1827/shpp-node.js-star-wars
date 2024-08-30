@@ -6,8 +6,9 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe, Query
-} from "@nestjs/common";
+  ParseIntPipe,
+  Query,
+} from '@nestjs/common';
 import { StarshipService } from './starship.service';
 import { CreateStarshipDto } from './dto/create-starship.dto';
 import { UpdateStarshipDto } from './dto/update-starship.dto';
@@ -16,7 +17,7 @@ import { Roles } from '../role/role.decorator';
 import { UserRole } from '../role/role.enum';
 import { Public } from '../common/decorators/public.decorator';
 import { Starship } from './entities/starship.entity';
-import { Pagination } from "nestjs-typeorm-paginate";
+import { Pagination } from 'nestjs-typeorm-paginate';
 
 @Controller('api/v1/starships')
 @ApiTags('Starship')
