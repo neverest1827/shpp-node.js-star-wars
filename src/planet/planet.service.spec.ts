@@ -46,8 +46,8 @@ describe('PlanetService', (): void => {
         {
           provide: CommonService,
           useValue: {
-            getPeople: jest.fn(),
-            getFilms: jest.fn(),
+            getEntitiesByIds: jest.fn(),
+            getId: jest.fn(),
             getImages: jest.fn(),
             createUrl: jest.fn(),
             cleanUpUnusedImages: jest.fn(),
@@ -88,10 +88,11 @@ describe('PlanetService', (): void => {
       jest
         .spyOn(planetRepository, 'save')
         .mockResolvedValue(createPlanetDto as any);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getFilms').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(commonService, 'createUrl').mockReturnValue('url');
+      jest.spyOn(commonService, 'getId').mockResolvedValue(1);
 
       const result: OperationResult =
         await planetService.create(createPlanetDto);
@@ -219,8 +220,8 @@ describe('PlanetService', (): void => {
       } as Planet;
 
       jest.spyOn(planetService, 'findOne').mockResolvedValue(oldPlanet);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getFilms').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(planetRepository, 'save').mockResolvedValue(updatedPlanet);
       jest.spyOn(commonService, 'cleanUpUnusedImages').mockResolvedValue();

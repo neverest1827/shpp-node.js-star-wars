@@ -46,8 +46,8 @@ describe('StarshipService', (): void => {
         {
           provide: CommonService,
           useValue: {
-            getPeople: jest.fn(),
-            getFilms: jest.fn(),
+            getEntitiesByIds: jest.fn(),
+            getId: jest.fn(),
             getImages: jest.fn(),
             createUrl: jest.fn(),
             cleanUpUnusedImages: jest.fn(),
@@ -92,10 +92,11 @@ describe('StarshipService', (): void => {
       jest
         .spyOn(starshipRepository, 'save')
         .mockResolvedValue(createStarshipDto as any);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getFilms').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(commonService, 'createUrl').mockReturnValue('url');
+      jest.spyOn(commonService, 'getId').mockResolvedValue(1);
 
       const result: OperationResult =
         await starshipService.create(createStarshipDto);
@@ -225,8 +226,8 @@ describe('StarshipService', (): void => {
       } as Starship;
 
       jest.spyOn(starshipService, 'findOne').mockResolvedValue(oldStarship);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getFilms').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(starshipRepository, 'save').mockResolvedValue(updatedStarship);
       jest.spyOn(commonService, 'cleanUpUnusedImages').mockResolvedValue();

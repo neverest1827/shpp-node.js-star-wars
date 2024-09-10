@@ -134,7 +134,7 @@ describe('CommonService', () => {
         .spyOn(personRepository, 'findOne')
         .mockResolvedValueOnce(mockEntities[1]);
 
-      const result = await service.getEntitiesByIds([1, 2], personRepository);
+      const result = await service.getEntitiesByIds<Person>([1, 2], 'person');
       expect(result).toEqual(mockEntities);
     });
   });
@@ -149,7 +149,7 @@ describe('CommonService', () => {
         .spyOn(personRepository, 'findOne')
         .mockResolvedValueOnce(mockPeople[1]);
 
-      const result = await service.getPeople([1, 2]);
+      const result = await service.getEntitiesByIds<Person>([1, 2], 'person');
       expect(result).toEqual(mockPeople);
     });
   });

@@ -51,11 +51,8 @@ describe('FilmService', () => {
         {
           provide: CommonService,
           useValue: {
-            getPeople: jest.fn(),
-            getPlanets: jest.fn(),
-            getStarships: jest.fn(),
-            getVehicles: jest.fn(),
-            getSpecies: jest.fn(),
+            getEntitiesByIds: jest.fn(),
+            getId: jest.fn(),
             getImages: jest.fn(),
             createUrl: jest.fn(),
             cleanUpUnusedImages: jest.fn(),
@@ -92,11 +89,11 @@ describe('FilmService', () => {
 
       jest.spyOn(filmRepository, 'count').mockResolvedValue(1);
       jest.spyOn(filmRepository, 'save').mockResolvedValue(dto as any);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getPlanets').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getStarships').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getVehicles').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getSpecies').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(commonService, 'createUrl').mockReturnValue('url');
 
@@ -223,11 +220,11 @@ describe('FilmService', () => {
       } as Film;
 
       jest.spyOn(filmService, 'findOne').mockResolvedValue(oldFilm);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getPlanets').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getStarships').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getVehicles').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getSpecies').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(filmRepository, 'save').mockResolvedValue(updatedFilm);
       jest.spyOn(commonService, 'cleanUpUnusedImages').mockResolvedValue();

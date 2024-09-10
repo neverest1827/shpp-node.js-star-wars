@@ -46,8 +46,8 @@ describe('VehicleService', (): void => {
         {
           provide: CommonService,
           useValue: {
-            getPeople: jest.fn(),
-            getFilms: jest.fn(),
+            getEntitiesByIds: jest.fn(),
+            getId: jest.fn(),
             getImages: jest.fn(),
             createUrl: jest.fn(),
             cleanUpUnusedImages: jest.fn(),
@@ -86,10 +86,11 @@ describe('VehicleService', (): void => {
       jest
         .spyOn(vehicleRepository, 'save')
         .mockResolvedValue(createVehicleDto as any);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getFilms').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(commonService, 'createUrl').mockReturnValue('url');
+      jest.spyOn(commonService, 'getId').mockResolvedValue(1);
 
       const result: OperationResult =
         await vehicleService.create(createVehicleDto);
@@ -215,8 +216,8 @@ describe('VehicleService', (): void => {
       } as Vehicle;
 
       jest.spyOn(vehicleService, 'findOne').mockResolvedValue(oldVehicle);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getFilms').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(vehicleRepository, 'save').mockResolvedValue(updatedVehicle);
       jest.spyOn(commonService, 'cleanUpUnusedImages').mockResolvedValue();

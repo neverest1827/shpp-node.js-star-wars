@@ -46,9 +46,8 @@ describe('SpecieService', (): void => {
         {
           provide: CommonService,
           useValue: {
-            getPlanets: jest.fn(),
-            getPeople: jest.fn(),
-            getFilms: jest.fn(),
+            getEntitiesByIds: jest.fn(),
+            getId: jest.fn(),
             getImages: jest.fn(),
             createUrl: jest.fn(),
             cleanUpUnusedImages: jest.fn(),
@@ -90,11 +89,12 @@ describe('SpecieService', (): void => {
       jest
         .spyOn(specieRepository, 'save')
         .mockResolvedValue(createSpecieDto as any);
-      jest.spyOn(commonService, 'getPlanets').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getFilms').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(commonService, 'createUrl').mockReturnValue('url');
+      jest.spyOn(commonService, 'getId').mockResolvedValue(1);
 
       const result: OperationResult =
         await specieService.create(createSpecieDto);
@@ -223,9 +223,9 @@ describe('SpecieService', (): void => {
       } as Specie;
 
       jest.spyOn(specieService, 'findOne').mockResolvedValue(oldPlanet);
-      jest.spyOn(commonService, 'getPlanets').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getPeople').mockResolvedValue([]);
-      jest.spyOn(commonService, 'getFilms').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
+      jest.spyOn(commonService, 'getEntitiesByIds').mockResolvedValue([]);
       jest.spyOn(commonService, 'getImages').mockResolvedValue([]);
       jest.spyOn(specieRepository, 'save').mockResolvedValue(updatedSpecie);
       jest.spyOn(commonService, 'cleanUpUnusedImages').mockResolvedValue();
