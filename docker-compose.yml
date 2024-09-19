@@ -1,0 +1,44 @@
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./:/var/www/app
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    networks:
+      - mynetwork
+    depends_on:
+      - nodejs
+
+  nodejs:
+    image: node:18
+    volumes:
+      - ./:/var/www/app
+    working_dir: /var/www/app
+    command: sh -c "npm install && npm run typeorm:run && npm run fill-db"
+#    command: "npm start"
+    env_file:
+      - .env
+    networks:
+      - mynetwork
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_pass
+      MYSQL_DATABASE: your_database
+      MYSQL_USER: your_user
+      MYSQL_PASSWORD: your_pass
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
+
+volumes:
+  mysql_data:

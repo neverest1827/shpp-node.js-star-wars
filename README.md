@@ -1,10 +1,13 @@
 ## Description
 
 
-## Dependency installation
+## Install Docker and Docker-compose in the AWS EC2
 
 ```bash
-$ npm install
+$ sudo apt update
+$ sudo apt install docker.io docker-compose
+$ sudo systemctl start docker
+$ sudo systemctl enable docker
 ```
 
 ## Configuration
@@ -39,7 +42,7 @@ To set up your environment, create a `.env` file in the root directory of your p
 
 ```plaintext
 DATABASE_TYPE=mysql
-DATABASE_HOST=localhost
+DATABASE_HOST=mysql
 DATABASE_PORT=3306
 DATABASE_USERNAME=your_username
 DATABASE_PASSWORD=your_password
@@ -54,15 +57,25 @@ JWT_SECRET=your_jwt_secret
 SERVER_PORT=3000
 ```
 
+### NGINX Configuration 
+- In the `nginx/conf.d/default.conf` file, change the ``server_name` field to your domain
+
+### Docker Configuration
+- In the `docker-compose.yml` file, set the same data for the database container as specified in `.env`.
 ## Running the app
 
+
+#### 1) Запускаем контейнеры
 ```bash
-# perform migration
-$ npm run typeorm:run
-
-# fill the database
-$ npm run fill-db
-
-# start app
-$ npm run start
+$ docker-compose up -d
 ```
+#### 2) Просматриваем логи сборки что бы знать когда приложение сбилдится и будет готово к запуску
+```bash
+$ docker logs -f nest-app-nodejs-1
+```
+#### 3) Разкоменитируем 21 строку и коментируем 20 в `docker-compose.yml`
+#### 4) Перезапускаем контейнер с нодой
+```bash
+$ docker restart nest-app-nodejs-1
+```
+####  5) Открываем сайт по вашему домену
