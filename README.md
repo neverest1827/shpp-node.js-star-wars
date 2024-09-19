@@ -5,9 +5,13 @@
 
 ```bash
 $ sudo apt update
-$ sudo apt install docker.io docker-compose
-$ sudo systemctl start docker
-$ sudo systemctl enable docker
+$ sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+$ sudo apt-get install docker-ce
+$ sudo systemctl status docker
+$ sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep tag_name | cut -d '"' -f 4)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+$ sudo chmod +x /usr/local/bin/docker-compose
 ```
 
 ## Configuration
@@ -58,24 +62,25 @@ SERVER_PORT=3000
 ```
 
 ### NGINX Configuration 
-- In the `nginx/conf.d/default.conf` file, change the ``server_name` field to your domain
+- In the `nginx/conf.d/default.conf` file, change the `server_name` field to your domain
 
 ### Docker Configuration
 - In the `docker-compose.yml` file, set the same data for the database container as specified in `.env`.
 ## Running the app
 
 
-#### 1) Запускаем контейнеры
+#### 1) Launching the containers
 ```bash
 $ docker-compose up -d
 ```
-#### 2) Просматриваем логи сборки что бы знать когда приложение сбилдится и будет готово к запуску
+#### 2) Review the build logs to know when the application will be knocked down and ready to run.
 ```bash
-$ docker logs -f nest-app-nodejs-1
+$ docker logs -f shpp-nodejs-star-wars-nodejs-1
 ```
-#### 3) Разкоменитируем 21 строку и коментируем 20 в `docker-compose.yml`
-#### 4) Перезапускаем контейнер с нодой
+#### 3) Uncomment line 21 and comment 20 in the `docker-compose.yml`
+#### 4) Rebuild the assembly
 ```bash
-$ docker restart nest-app-nodejs-1
+$ docker-compose down
+$ docker-compose up -d
 ```
-####  5) Открываем сайт по вашему домену
+####  5) Open the site by your domain
