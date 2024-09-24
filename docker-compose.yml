@@ -18,7 +18,7 @@ services:
       - ./:/var/www/app
     working_dir: /var/www/app
 #    command: sh -c "npm install && npm run typeorm:run && npm run fill-db && npm run start"
-    command: "npm run test && npm run start"
+    command: sh -c "npm install && npm run test && npm run start"
     environment:
       DATABASE_TYPE: "${DATABASE_TYPE}"
       DATABASE_HOST: "${DATABASE_HOST}"
