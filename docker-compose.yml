@@ -20,18 +20,18 @@ services:
 #    command: sh -c "npm install && npm run typeorm:run && npm run fill-db && npm run test && npm run start"
     command: "npm run typeorm:run & npm run test & npm start"
     environment:
-      - DATABASE_TYPE=$${env.DATABASE_TYPE}
-      - DATABASE_HOST=$${env.DATABASE_HOST}
-      - DATABASE_PORT=$${env.DATABASE_PORT}
-      - DATABASE_USERNAME=$${env.DATABASE_USERNAME}
-      - DATABASE_PASSWORD=$${env.DATABASE_PASSWORD}
-      - DATABASE_NAME=$${env.DATABASE_NAME}
-      - ACCESS_KEY_ID=$${env.ACCESS_KEY_ID}
-      - SECRET_ACCESS_KEY=$${env.SECRET_ACCESS_KEY}
-      - REGION=$${env.REGION}
-      - BUCKET=$${env.BUCKET}
-      - JWT_SECRET=$${env.JWT_SECRET}
-      - SERVER_PORT=$${env.SERVER_PORT}
+      DATABASE_TYPE: "${DATABASE_TYPE}"
+      DATABASE_HOST: "${DATABASE_HOST}"
+      DATABASE_PORT: "${DATABASE_PORT}"
+      DATABASE_USERNAME: "${DATABASE_USERNAME}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      ACCESS_KEY_ID: "${ACCESS_KEY_ID}"
+      SECRET_ACCESS_KEY: "${SECRET_ACCESS_KEY}"
+      REGION: "${REGION}"
+      BUCKET: "${BUCKET}"
+      JWT_SECRET: "${JWT_SECRET}"
+      SERVER_PORT: "${SERVER_PORT}"
     networks:
       - mynetwork
 
